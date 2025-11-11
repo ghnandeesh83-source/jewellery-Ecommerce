@@ -1,0 +1,9 @@
+{% extends 'layout.html' %}
+{% block content %}
+  <section class="confirm">
+    <h2>Order Confirmed</h2>
+    <p>Thank you, {{ order.name }}! Your order <strong>{{ order.id }}</strong> has been confirmed.</p>
+    <p>Status: <strong>{{ order.status }}</strong></p>
+    <a href="/track?order_id={{ order.id }}" class="btn primary">Track Order</a>
+  </section>
+{% endblock %}

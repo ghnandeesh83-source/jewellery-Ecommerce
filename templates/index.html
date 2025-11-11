@@ -1,0 +1,62 @@
+{% extends 'layout.html' %}
+{% block content %}
+<section class="hero">
+  <div class="hero-content">
+    <h1>Fine Jewellery for Everyone</h1>
+    <p>Gold, Silver, and Diamond pieces for Women, Men, and Children.</p>
+  </div>
+</section>
+
+<section class="filters">
+  <div class="filter">
+    <label>Audience</label>
+    <select id="filter-audience">
+      <option value="all" selected>All</option>
+      <option value="women">Women</option>
+      <option value="men">Men</option>
+      <option value="children">Children</option>
+    </select>
+  </div>
+  <div class="filter">
+    <label>Type</label>
+    <select id="filter-type">
+      <option value="all" selected>All</option>
+      <option value="ring">Ring</option>
+      <option value="chain">Chain</option>
+      <option value="nosepin">Nose Pin</option>
+      <option value="necklace">Necklace</option>
+    </select>
+  </div>
+  <div class="filter">
+    <label>Metal</label>
+    <select id="filter-metal">
+      <option value="all" selected>All</option>
+      <option value="gold">Gold</option>
+      <option value="silver">Silver</option>
+      <option value="diamond">Diamond</option>
+    </select>
+  </div>
+</section>
+
+<section id="products" class="grid"></section>
+
+<!-- Cart Drawer -->
+<aside id="cart" class="cart">
+  <div class="cart-header">
+    <h3>Your Cart</h3>
+    <button id="close-cart" class="icon-btn">✕</button>
+  </div>
+  <div id="cart-items"></div>
+  <div class="cart-footer">
+    <div class="total"><span>Total:</span> <strong id="cart-total">₹0</strong></div>
+    <form id="checkout-form" class="checkout-form">
+      <input required name="name" placeholder="Full name" />
+      <input required name="email" type="email" placeholder="Email" />
+      <input required name="phone" placeholder="Phone" />
+      <button type="submit" class="btn primary">Place Order</button>
+    </form>
+  </div>
+</aside>
+
+<div id="toast" class="toast" hidden></div>
+{% endblock %}

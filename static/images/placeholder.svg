@@ -1,0 +1,6 @@
+<svg width="500" height="500" viewBox="0 0 500 500" xmlns="http://www.w3.org/2000/svg">
+  <rect width="500" height="500" fill="#1e2640"/>
+  <circle cx="250" cy="200" r="80" fill="none" stroke="#aab2c8" stroke-width="4"/>
+  <circle cx="250" cy="200" r="20" fill="#aab2c8"/>
+  <text x="250" y="350" font-family="Arial, sans-serif" font-size="24" fill="#aab2c8" text-anchor="middle">Jewelry</text>
+</svg>

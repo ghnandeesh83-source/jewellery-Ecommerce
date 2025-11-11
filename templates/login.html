@@ -1,0 +1,31 @@
+{% extends 'layout.html' %}
+{% block content %}
+<div class="login-container">
+  <div class="login-box">
+    <div class="login-header">
+      <h2>Welcome Back</h2>
+      <p>Sign in to continue to Shri Jewellery</p>
+    </div>
+    <form id="login-form">
+      <div id="phone-step">
+        <div class="input-group">
+          <label for="phone">Phone Number</label>
+          <div class="phone-input">
+            <span class="country-code">+91</span>
+            <input type="tel" id="phone" name="phone" placeholder="98765 43210" required>
+          </div>
+        </div>
+        <button type="button" id="send-otp-btn" class="btn primary full-width">Send OTP</button>
+      </div>
+      <div id="otp-step" style="display: none;">
+        <div class="input-group">
+          <label for="otp">Enter OTP</label>
+          <input type="text" id="otp" name="otp" placeholder="_ _ _ _ _ _" required>
+          <div id="mock-otp-display" class="mock-otp"></div>
+        </div>
+        <button type="submit" class="btn primary full-width">Verify & Login</button>
+        <button type="button" id="back-btn" class="btn secondary full-width">Back</button>
+      </div>
+  </div>
+</div>
+{% endblock %}

@@ -1,0 +1,22 @@
+{% extends 'layout.html' %}
+{% block content %}
+  <section class="tryon">
+    <h2>Virtual Try-On</h2>
+    <p>Enable your camera to preview jewelry overlays.</p>
+    <div class="tryon-stage">
+      <video id="camera" autoplay playsinline></video>
+      <div id="overlay" class="overlay" title="Drag to adjust"></div>
+    </div>
+    <div class="toolbar">
+      <label>Overlay:</label>
+      <select id="overlay-type">
+        <option value="nosepin">Nose Pin</option>
+        <option value="necklace">Necklace</option>
+        <option value="ring">Ring</option>
+      </select>
+      <label>Size:</label>
+      <input id="overlay-size" type="range" min="20" max="200" value="60" />
+    </div>
+  </section>
+    <script src="/static/js/tryon.js" defer></script>
+{% endblock %}

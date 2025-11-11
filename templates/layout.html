@@ -1,0 +1,49 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <title>Shri Jewellery</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;600;800&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="/static/css/styles.css" />
+  </head>
+  <body>
+    <header class="site-header">
+      <div class="container header-inner">
+        <a class="brand" href="/">Shri Jewellery</a>
+<nav class="nav">
+          {% if user %}
+            <span class="user-info">Welcome, {{ user.phone }}</span>
+            <a href="/logout" class="btn secondary">Logout</a>
+          {% else %}
+            <a href="/login" class="btn primary">Login</a>
+          {% endif %}
+          <button id="open-cart" class="btn">Cart</button>
+        </nav>
+      </div>
+    </header>
+
+    <main class="container">
+      {% block content %}{% endblock %}
+    </main>
+
+    <footer class="site-footer">
+      <div class="container footer-inner">
+        <div>
+          <strong>Address:</strong>
+          <div>Chinya, Nagamangala Taluk, Mandya District, Mysore Main Road</div>
+        </div>
+        <div>
+          <strong>Phone:</strong>
+          <div>+91 90192 31931 / +91 89044 39579</div>
+        </div>
+      </div>
+    </footer>
+
+    <script src="/static/js/main.js" defer></script>
+    <script src="/static/js/login.js" defer></script>
+    <script src="/static/js/chatbot.js" defer></script>
+  </body>
+</html>

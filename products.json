@@ -1,0 +1,25 @@
+[
+  {"id":"gold-men-ring-5","name":"Classic Gold Ring","audience":"men","type":"ring","metal":"gold","grams":[5,10,20],"base_price":12000,"image":"https://ln.run/IKb0W"},
+  {"id":"gold-men-chain-5","name":"Gold Curb Chain","audience":"men","type":"chain","metal":"gold","grams":[10,20,30],"base_price":35000,"image":"https://i.etsystatic.com/6221024/r/il/072728/2430967644/il_fullxfull.2430967644_8pei.jpg"},
+  {"id":"silver-men-chain-1","name":"Silver Figaro Chain","audience":"men","type":"chain","metal":"silver","grams":[10,20],"base_price":6000,"image":"https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcSDilzC4W0rFvy71xkmK-IUAaRX7O88fQrJEA&s"},
+  {"id":"silver-men-ring-1","name":"Silver Signet Ring","audience":"men","type":"ring","metal":"silver","grams":[5,10],"base_price":3500,"image":"https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcTgL6Stu_HWC7z-LPs-4swEvvLWt7ej3A1HuA&s"},
+  {"id":"diamond-men-ring-1","name":"Diamond Accent Ring","audience":"men","type":"ring","metal":"diamond","grams":[5,10],"base_price":45000,"image":"https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcRFr52Buc6eqtH75CrXFa0iF4qlCS5SyXdn7A&s"},
+
+  {"id":"gold-women-ring-1","name":"Solitaire Gold Ring","audience":"women","type":"ring","metal":"gold","grams":[5,10,15],"base_price":22000,"image":"https://images.unsplash.com/photo-1605100804763-247f67b3557e?w=500&h=500&fit=crop&crop=center"},
+  {"id":"diamond-women-ring-1","name":"Diamond Halo Ring","audience":"women","type":"ring","metal":"diamond","grams":[5,10],"base_price":65000,"image":"https://images.unsplash.com/photo-1573408301185-9146fe634ad0?w=500&h=500&fit=crop&crop=center"},
+  {"id":"silver-women-ring-1","name":"Silver Stack Ring","audience":"women","type":"ring","metal":"silver","grams":[5,10],"base_price":2800,"image":"https://images.unsplash.com/photo-1515562141207-7a88fb7ce338?w=500&h=500&fit=crop&crop=center"},
+  {"id":"gold-women-necklace-1","name":"Elegant Gold Necklace","audience":"women","type":"necklace","metal":"gold","grams":[10,20,30],"base_price":42000,"image":"https://source.unsplash.com/500x500/?gold,necklace,jewelry"},
+  {"id":"diamond-women-necklace-1","name":"Diamond Tennis Necklace","audience":"women","type":"necklace","metal":"diamond","grams":[10,20],"base_price":125000,"image":"https://source.unsplash.com/500x500/?diamond,necklace,jewelry"},
+  {"id":"silver-women-necklace-1","name":"Silver Pendant Necklace","audience":"women","type":"necklace","metal":"silver","grams":[5,10],"base_price":5200,"image":"https://rb.gy/ltluzp"},
+  {"id":"gold-women-nosepin-1","name":"Gold Nose Pin","audience":"women","type":"nosepin","metal":"gold","grams":[1,2,3],"base_price":2500,"image":"https://shorturl.at/hLQGO"},
+  {"id":"diamond-women-nosepin-1","name":"Diamond Nose Pin","audience":"women","type":"nosepin","metal":"diamond","grams":[1,2],"base_price":9800,"image":"https://kntn.ly/7b04396e"},
+  {"id":"silver-women-nosepin-1","name":"Silver Nose Pin","audience":"women","type":"nosepin","metal":"silver","grams":[1,2],"base_price":1200,"image":"https://kntn.ly/eac16c40"},
+
+  {"id":"gold-children-ring-1","name":"Kids Gold Ring","audience":"children","type":"ring","metal":"gold","grams":[2,5],"base_price":6500,"image":"https://5.imimg.com/data5/SELLER/Default/2021/5/QN/BH/TC/130019253/ruhi-heart-diamond-ring-500x500.jpg"},
+  {"id":"silver-children-ring-1","name":"Kids Silver Ring","audience":"children","type":"ring","metal":"silver","grams":[2,5],"base_price":1500,"image":"https://shorturl.at/lftq7"},
+  {"id":"gold-children-chain-1","name":"Kids Gold Chain","audience":"children","type":"chain","metal":"gold","grams":[5,10],"base_price":12000,"image":"https://cdn.joyalukkas.in/media/catalog/product/t/m/tm014015383_1.jpg?tr=w-360"},
+  {"id":"silver-children-chain-1","name":"Kids Silver Chain","audience":"children","type":"chain","metal":"silver","grams":[5,10],"base_price":3500,"image":"https://source.unsplash.com/500x500/?kids,silver,chain,jewelry"},
+
+  {"id":"gold-men-chain-2","name":"Gold Rope Chain","audience":"men","type":"chain","metal":"gold","grams":[15,25,35],"base_price":48000,"image":"https://source.unsplash.com/500x500/?gold,rope,chain,jewelry"},
+  {"id":"silver-women-ring-2","name":"Silver Heart Ring","audience":"women","type":"ring","metal":"silver","grams":[5,10],"base_price":3000,"image":"https://source.unsplash.com/500x500/?silver,heart,ring,jewelry"}
+]

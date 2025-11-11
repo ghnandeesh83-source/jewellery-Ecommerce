@@ -1,0 +1,12 @@
+{% extends 'layout.html' %}
+{% block content %}
+  <section class="track">
+    <h2>Track Your Order</h2>
+    <form id="track-form" class="track-form">
+      <input name="order_id" id="track-id" placeholder="Enter Order ID" value="{{ order_id or '' }}" required />
+      <button class="btn primary" type="submit">Track</button>
+    </form>
+    <div id="track-result" class="track-result"></div>
+    <button id="mark-delivered" class="btn" hidden>Mark Delivered (Demo)</button>
+  </section>
+{% endblock %}
