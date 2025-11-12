@@ -18,5 +18,8 @@
       <input id="overlay-size" type="range" min="20" max="200" value="60" />
     </div>
   </section>
+    <!-- MediaPipe FaceMesh (fallback when FaceDetector is unavailable) -->
+    <script src="https://cdn.jsdelivr.net/npm/@mediapipe/face_mesh/face_mesh.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/@mediapipe/camera_utils/camera_utils.js"></script>
     <script src="/static/js/tryon.js" defer></script>
 {% endblock %}
