@@ -12,18 +12,31 @@
   let manualMode = false;
   let mpCamera = null; // MediaPipe camera
   let mpReady = false;
+  let lastBox = null; // smoothing
+  let lastDetectTs = 0; // throttle native detection
+  let posFrames = 0, negFrames = 0; // debounce
 
-  // Initialize face detection
+  function lerp(a,b,t){ return a + (b-a)*t; }
+  function smoothBox(b){
+    if (!lastBox) { lastBox = { ...b }; return lastBox; }
+    lastBox = {
+      x: lerp(lastBox.x, b.x, 0.2),
+      y: lerp(lastBox.y, b.y, 0.2),
+      width: lerp(lastBox.width, b.width, 0.2),
+      height: lerp(lastBox.height, b.height, 0.2)
+    };
+    return lastBox;
+  }
+
+  // Initialize face detection (choose pipeline)
   async function initFaceDetection() {
     try {
-      // Prefer native FaceDetector when available
       if ('FaceDetector' in window) {
-        faceDetector = new FaceDetector({ maxDetectedFaces: 1, fastMode: true });
-        console.log('FaceDetector API enabled');
-        detectFaceNative();
+        // Native pipeline: we control getUserMedia
+        await startNativePipeline();
       } else {
-        console.log('FaceDetector not supported, trying MediaPipe FaceMesh');
-        initMediaPipeFaceMesh();
+        // Fallback pipeline: MediaPipe manages camera stream
+        startMediaPipePipeline();
       }
     } catch (error) {
       console.log('Face detection init failed, using manual mode:', error);
@@ -40,16 +53,37 @@
     toolbar.prepend(notice);
   }
 
+  async function startNativePipeline(){
+    // Single camera stream owned by us (avoid conflict with MediaPipe Camera)
+    const stream = await navigator.mediaDevices.getUserMedia({ 
+      video: { width: 640, height: 480, facingMode: 'user' }, 
+      audio: false 
+    });
+    video.srcObject = stream;
+    await new Promise(res => video.addEventListener('loadedmetadata', res, { once: true }));
+
+    faceDetector = new FaceDetector({ maxDetectedFaces: 1, fastMode: true });
+    detectFaceNative();
+  }
+
   async function detectFaceNative() {
     if (!faceDetector || !video.videoWidth) return;
+    const now = performance.now();
+    if (now - lastDetectTs < 66) { // ~15 FPS detection to reduce flicker/CPU
+      animationId = requestAnimationFrame(detectFaceNative);
+      return;
+    }
+    lastDetectTs = now;
     try {
       const faces = await faceDetector.detect(video);
       if (faces.length > 0) {
-        const bbox = faces[0].boundingBox;
+        const bbox = smoothBox(faces[0].boundingBox);
         positionOverlayOnBox(bbox);
-        setDetectedState(true);
+        posFrames++; negFrames = 0;
+        if (posFrames >= 2) setDetectedState(true);
       } else {
-        setDetectedState(false);
+        negFrames++; posFrames = 0;
+        if (negFrames >= 3) setDetectedState(false);
       }
     } catch (error) {
       console.log('FaceDetector error:', error);
@@ -107,11 +141,14 @@
     overlay.style.transform = 'translate(0, 0)';
   }
 
-  // MediaPipe FaceMesh fallback
-  function initMediaPipeFaceMesh(){
+  // MediaPipe FaceMesh fallback (manages its own camera stream)
+  function startMediaPipePipeline(){
     if (!(window.FaceMesh && window.Camera)){
-      // If scripts didn't load for some reason, fall back to manual
-      console.log('MediaPipe scripts not found, using manual mode');
+      console.log('MediaPipe scripts not found, falling back to manual + plain camera');
+      // Show plain camera so user still sees themselves
+      navigator.mediaDevices.getUserMedia({ video: { facingMode: 'user' }, audio: false })
+        .then(stream => video.srcObject = stream)
+        .catch(() => {});
       showManualMode();
       return;
     }
@@ -129,21 +166,21 @@
     faceMesh.onResults((results) => {
       if (manualMode) return;
       const landmarks = results.multiFaceLandmarks && results.multiFaceLandmarks[0];
-      if (!landmarks) { setDetectedState(false); return; }
-      // Compute a bounding box from landmarks (normalized coords)
+      if (!landmarks) { negFrames++; posFrames = 0; if (negFrames >= 3) setDetectedState(false); return; }
       let minX=1, minY=1, maxX=0, maxY=0;
       for (const p of landmarks){
         if (p.x < minX) minX = p.x; if (p.y < minY) minY = p.y;
         if (p.x > maxX) maxX = p.x; if (p.y > maxY) maxY = p.y;
       }
-      const bbox = {
+      const raw = {
         x: minX * video.videoWidth,
         y: minY * video.videoHeight,
         width: (maxX-minX) * video.videoWidth,
         height: (maxY-minY) * video.videoHeight
       };
+      const bbox = smoothBox(raw);
       positionOverlayOnBox(bbox);
-      setDetectedState(true);
+      posFrames++; negFrames = 0; if (posFrames >= 2) setDetectedState(true);
     });
 
     mpCamera = new Camera(video, {
@@ -156,28 +193,9 @@
   }
 
   async function start() {
-    try {
-      const stream = await navigator.mediaDevices.getUserMedia({ 
-        video: { width: 640, height: 480, facingMode: 'user' }, 
-        audio: false 
-      });
-      video.srcObject = stream;
-
-      // Default overlay art
-      applyOverlayArt(type.value);
-
-      video.addEventListener('loadedmetadata', () => {
-        initFaceDetection();
-      });
-    } catch (e) {
-      overlay.textContent = 'Camera access denied or not available';
-      overlay.style.background = '#ff4444';
-      overlay.style.color = 'white';
-      overlay.style.display = 'flex';
-      overlay.style.alignItems = 'center';
-      overlay.style.justifyContent = 'center';
-      overlay.style.fontSize = '14px';
-    }
+    // Default overlay art
+    applyOverlayArt(type.value);
+    await initFaceDetection();
   }
 
   // Manual positioning (fallback)
@@ -235,7 +253,6 @@
   // Jewelry type changes
   type.addEventListener('change', () => {
     applyOverlayArt(type.value);
-    // Re-enable auto positioning after change
     if (!dragging) manualMode = false;
   });
 
