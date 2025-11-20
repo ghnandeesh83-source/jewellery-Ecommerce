@@ -234,6 +234,8 @@ function closeCart(){ q('#cart').classList.remove('open'); }
 async function checkout(e){
   e.preventDefault();
   if (CART.length===0) return notify('Your cart is empty');
+  const btn = e.target.querySelector('button[type="submit"]');
+  btn.disabled = true; btn.textContent = 'Placing Order…';
   const fd = new FormData(e.target);
   const payload = {
     name: fd.get('name'),
@@ -242,11 +244,17 @@ async function checkout(e){
     items: CART.map(({id, grams, qty, price})=>({id, grams, qty, price}))
   };
   const res = await fetch('/api/order', { method: 'POST', headers: {'Content-Type':'application/json'}, body: JSON.stringify(payload) });
-  if (!res.ok) return notify('Failed to place order');
+  if (!res.ok) { btn.disabled = false; btn.textContent = 'Place Order'; return notify('Failed to place order'); }
   const data = await res.json();
   CART = []; saveCart(); renderCart(); closeCart();
-  notify(`Order ${data.order_id} placed`);
-  window.location.href = `/order/${data.order_id}`;
+  // Show a brief confirmation state before redirect
+  const cartBox = q('.cart');
+  if (cartBox) cartBox.classList.remove('open');
+  const msg = el('div','order-confirmed');
+  msg.innerHTML = `<h2>Order Confirmed!</h2><p>Order #${data.order_id}</p>`;
+  msg.style.cssText = 'position:fixed;top:50%;left:50%;transform:translate(-50%,-50%);z-index:50;background:var(--card);border:1px solid var(--accent);border-radius:16px;padding:32px;text-align:center;box-shadow:0 8px 32px rgba(0,0,0,0.25);min-width:300px;';
+  document.body.appendChild(msg);
+  setTimeout(() => window.location.href = `/order/${data.order_id}`, 3200);
 }
 
 // Tracking
