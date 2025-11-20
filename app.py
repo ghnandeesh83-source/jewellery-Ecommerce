@@ -1,7 +1,7 @@
 import os
 import json
 import uuid
-from datetime import datetime
+from datetime import datetime, UTC
 from flask import Flask, render_template, jsonify, request, redirect, url_for, abort, session
 from dotenv import load_dotenv
 import random
@@ -144,6 +144,7 @@ def api_create_order():
     name = data.get('name')
     email = data.get('email')
     phone = data.get('phone')
+    address = data.get('address')
     items = data.get('items', [])
 
     order_id = uuid.uuid4().hex[:10].upper()
@@ -152,9 +153,10 @@ def api_create_order():
         'name': name,
         'email': email,
         'phone': phone,
+        'address': address,
         'items': items,
         'status': 'Confirmed',
-        'created_at': datetime.utcnow().isoformat() + 'Z'
+        'created_at': datetime.now(UTC).isoformat()
     }
 
     # Notify (best-effort, optional)

@@ -241,6 +241,7 @@ async function checkout(e){
     name: fd.get('name'),
     email: fd.get('email'),
     phone: fd.get('phone'),
+    address: fd.get('address'),
     items: CART.map(({id, grams, qty, price})=>({id, grams, qty, price}))
   };
   const res = await fetch('/api/order', { method: 'POST', headers: {'Content-Type':'application/json'}, body: JSON.stringify(payload) });
