@@ -99,9 +99,6 @@ def logout():
     return redirect(url_for('login'))
 
 
-@app.route('/api/order', methods=['POST'])
-
-
 @app.route('/api/products')
 def api_products():
     return jsonify(PRODUCTS)
