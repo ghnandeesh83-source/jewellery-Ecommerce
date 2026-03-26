@@ -309,7 +309,7 @@ IMPORTANT - GOLD RATES INFO:
 STORE INFORMATION:
 - Name: Shri Jewellery
 - Location: Chinya, Nagamangala Taluk, Mandya District, Mysore Main Road
-- Phone: +91 90192 31931 / +91 89044 39579
+- Phone: +91 6363650179 / +91 89044 39579
 - We specialize in Gold, Silver, and Diamond jewelry for Women, Men, and Children
 
 BASE RATES REFERENCE (Per Gram):
@@ -338,29 +338,29 @@ Provide a helpful, friendly response. If user asks about gold/silver rates (toda
         reply = response.text.strip() if response.text else None
         if reply:
             if len(reply) > 800:
-                reply = reply[:800] + "...\n\nFor more details, call +91 90192 31931."
+                reply = reply[:800] + "...\n\nFor more details, call +91 6363650179."
             return jsonify({'reply': reply})
     except Exception as e:
         print(f"Gemini API error: {e}")
         # Return a friendly error message
-        return jsonify({'reply': 'Sorry, I\'m having trouble processing your request right now. Please try asking about gold rates, silver prices, or our products! You can also call us at +91 90192 31931.'})
+        return jsonify({'reply': 'Sorry, I\'m having trouble processing your request right now. Please try asking about gold rates, silver prices, or our products! You can also call us at +91 6363650179.'})
     
     # Fallback: Predefined responses for common jewelry queries
     keywords = {
-        'price': 'CURRENT RATES:\n• 24K Gold: ₹12,500/gram\n• 22K Gold: ₹11,500/gram\n• 18K Gold: ₹9,500/gram\n• 925 Silver: ₹90/gram\n\nCall +91 90192 31931 for diamond pricing!',
+        'price': 'CURRENT RATES:\n• 24K Gold: ₹12,500/gram\n• 22K Gold: ₹11,500/gram\n• 18K Gold: ₹9,500/gram\n• 925 Silver: ₹90/gram\n\nCall +91 6363650179 for diamond pricing!',
         'gold': 'We offer beautiful gold jewelry including rings, chains, necklaces, and nose pins for women, men, and children. Current 22K Gold rate: ₹11,500/gram. Which item interests you?',
         'silver': 'Our silver collection includes elegant rings, chains, necklaces, and nose pins. Current 925 Silver rate: ₹90/gram. Perfect for both everyday wear and special occasions!',
         'diamond': 'We have premium diamond jewelry including rings, necklaces, and nose pins. Call us for custom designs and current diamond pricing!',
         'ring': 'We offer rings in gold, silver, and diamond for women, men, and children. Available in various designs and weights. What type interests you?',
         'chain': 'Our chains are available in gold, silver, and diamond. 22K Gold chains from ₹35,000, 925 Silver from ₹3,500. What style do you prefer?',
         'necklace': 'Beautiful necklaces in gold, silver, and diamond. 22K Gold necklaces from ₹42,000. We have designs for every occasion!',
-        'delivery': 'We deliver across India in 3-7 business days. Free shipping on orders above ₹5,000. Call +91 90192 31931 for more details.',
-        'return': 'We offer a 7-day return/exchange policy on all jewelry. Contact us at +91 90192 31931 to initiate returns.',
+        'delivery': 'We deliver across India in 3-7 business days. Free shipping on orders above ₹5,000. Call +91 6363650179 for more details.',
+        'return': 'We offer a 7-day return/exchange policy on all jewelry. Contact us at +91 6363650179 to initiate returns.',
         'children': 'We have a special children\'s jewelry collection in gold and silver with safe, age-appropriate designs. Starting from ₹1,500.',
         'about': 'Shri Jewellery is a premium jewelry store in Chinya, Nagamangala Taluk, Mandya District on Mysore Main Road. We specialize in Gold, Silver, and Diamond jewelry for all occasions. Current Gold Rate: 22K @ ₹11,500/gram!',
-        'store': 'Shri Jewellery - Your trusted jewelry destination!\n📍 Location: Chinya, Nagamangala Taluk, Mandya District, Mysore Main Road\n📞 Phone: +91 90192 31931 / +91 89044 39579\n\nCurrent Gold Rate: 22K @ ₹11,500/gram',
-        'contact': '📞 Contact Shri Jewellery:\n• Phone: +91 90192 31931\n• Phone: +91 89044 39579\n• Location: Chinya, Nagamangala Taluk, Mandya District, Mysore Main Road\n\nCurrent Gold Rate: 22K @ ₹11,500/gram',
-        'rate': 'CURRENT GOLD RATES:\n• 24K Gold: ₹12,500/gram\n• 22K Gold: ₹11,500/gram\n• 18K Gold: ₹9,500/gram\n• 925 Sterling Silver: ₹90/gram\n\nPrices are indicative. Contact +91 90192 31931 for exact pricing!',
+        'store': 'Shri Jewellery - Your trusted jewelry destination!\n📍 Location: Chinya, Nagamangala Taluk, Mandya District, Mysore Main Road\n📞 Phone: +91 6363650179 / +91 89044 39579\n\nCurrent Gold Rate: 22K @ ₹11,500/gram',
+        'contact': '📞 Contact Shri Jewellery:\n• Phone: +91 6363650179\n• Phone: +91 89044 39579\n• Location: Chinya, Nagamangala Taluk, Mandya District, Mysore Main Road\n\nCurrent Gold Rate: 22K @ ₹11,500/gram',
+        'rate': 'CURRENT GOLD RATES:\n• 24K Gold: ₹12,500/gram\n• 22K Gold: ₹11,500/gram\n• 18K Gold: ₹9,500/gram\n• 925 Sterling Silver: ₹90/gram\n\nPrices are indicative. Contact +91 6363650179 for exact pricing!',
     }
     
     for keyword, response_text in keywords.items():
@@ -368,7 +368,7 @@ Provide a helpful, friendly response. If user asks about gold/silver rates (toda
             return jsonify({'reply': response_text})
     
     # Default fallback if no keywords match
-    return jsonify({'reply': 'Thank you for your interest! We specialize in Gold, Silver, and Diamond jewelry for all occasions. What would you like to know? You can ask about prices, designs, delivery, or any of our products. Call us at +91 90192 31931 for personalized assistance.'})
+    return jsonify({'reply': 'Thank you for your interest! We specialize in Gold, Silver, and Diamond jewelry for all occasions. What would you like to know? You can ask about prices, designs, delivery, or any of our products. Call us at +91 6363650179 for personalized assistance.'})
 
 
 if __name__ == '__main__':

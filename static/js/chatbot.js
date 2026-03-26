@@ -183,14 +183,14 @@
       } else {
         // Add bot response with delay for realism
         setTimeout(() => {
-          addBubble(data.reply || 'Sorry, I\'m having trouble responding right now. Please try calling us at +91 90192 31931.');
+          addBubble(data.reply || 'Sorry, I\'m having trouble responding right now. Please try calling us at +91 6363650179.');
         }, 500);
       }
       
     } catch (error) {
       console.error('Chat error:', error);
       typingBubble.remove();
-      addBubble('Sorry, I\'m having trouble connecting. Please try again or call us at +91 90192 31931.');
+      addBubble('Sorry, I\'m having trouble connecting. Please try again or call us at +91 6363650179.');
     }
   });
   
