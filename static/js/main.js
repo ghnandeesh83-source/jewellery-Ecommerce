@@ -6,7 +6,18 @@ const q = sel => document.querySelector(sel);
 const el = (tag, cls) => { const n = document.createElement(tag); if (cls) n.className = cls; return n; };
 
 function money(n) { return '₹' + Number(n).toLocaleString('en-IN'); }
-function notify(msg) { const t = q('#toast'); t.textContent = msg; t.hidden = false; setTimeout(()=> t.hidden = true, 2500); }
+function notify(msg) {
+  const t = q('#toast');
+  // Fallback to alert if toast element is missing for any reason
+  if (!t) {
+    alert(msg);
+    return;
+  }
+  t.textContent = msg;
+  t.hidden = false;
+  if (notify._timer) clearTimeout(notify._timer);
+  notify._timer = setTimeout(() => { t.hidden = true; }, 2500);
+}
 
 function calcPrice(base, grams) { const baseUnit = 5; return Math.round(base * (grams / baseUnit)); }
 
@@ -14,16 +25,104 @@ async function loadProducts() {
   const res = await fetch('/api/products');
   PRODUCTS = await res.json();
   renderProducts();
+  if (typeof renderScrollGallery === 'function') renderScrollGallery();
+  
+  if (typeof renderImageStrip === 'function') renderImageStrip();
+  buildHeroSlider();
 }
-
 function renderProducts() {
   const wrap = q('#products');
+  if (!wrap) return;
   wrap.innerHTML = '';
   const af = q('#filter-audience').value;
   const tf = q('#filter-type').value;
   const mf = q('#filter-metal').value;
   PRODUCTS.filter(p => (af==='all'||p.audience===af) && (tf==='all'||p.type===tf) && (mf==='all'||p.metal===mf))
     .forEach(p => wrap.appendChild(productCard(p)));
+}
+
+// Populate the scroll gallery with real product images
+function renderScrollGallery() {
+  const track = q('.scroll-gallery-track');
+  if (!track || !Array.isArray(PRODUCTS) || PRODUCTS.length === 0) return;
+
+  track.innerHTML = '';
+
+  // Choose a subset of products that have images (up to 20 for performance)
+  const featured = PRODUCTS.filter(p => p.image).slice(0, 20);
+
+  featured.forEach(p => {
+    const item = el('div', 'scroll-gallery-item');
+    const img = el('img');
+    img.alt = p.name || 'Featured jewelry';
+    img.src = p.image;
+    item.appendChild(img);
+    track.appendChild(item);
+  });
+}
+
+// Premium hero slider built from existing product images
+function buildHeroSlider() {
+  const track = q('.hero-slider-track');
+  if (!track || !Array.isArray(PRODUCTS) || PRODUCTS.length === 0) return;
+
+  // Only rings and chains in gold or diamond with valid images
+  const featured = PRODUCTS.filter(p => {
+    if (!p.image) return false;
+    const typeOk = p.type === 'ring' || p.type === 'chain';
+    const metalOk = p.metal === 'gold' || p.metal === 'diamond';
+    return typeOk && metalOk;
+  });
+
+  if (featured.length === 0) return;
+
+  track.innerHTML = '';
+
+  const slides = featured.slice(0, 12).map(p => {
+    const slide = el('div', 'hero-slide');
+    const img = el('img');
+    img.alt = '';
+    img.src = p.image;
+    slide.appendChild(img);
+    track.appendChild(slide);
+    return slide;
+  });
+
+  if (slides.length === 0) return;
+
+  let index = 0;
+  slides[0].classList.add('is-active');
+
+  let intervalId = null;
+  const delay = 4000; // ms per slide
+
+  function showSlide(nextIdx) {
+    slides[index].classList.remove('is-active');
+    index = nextIdx;
+    slides[index].classList.add('is-active');
+  }
+
+  function startAuto() {
+    if (intervalId !== null) return;
+    intervalId = setInterval(() => {
+      const nextIdx = (index + 1) % slides.length;
+      showSlide(nextIdx);
+    }, delay);
+  }
+
+  function stopAuto() {
+    if (intervalId !== null) {
+      clearInterval(intervalId);
+      intervalId = null;
+    }
+  }
+
+  // Start autoplay
+  startAuto();
+
+  // Pause on hover (desktop) and resume on leave
+  track.addEventListener('mouseenter', stopAuto);
+  track.addEventListener('mouseleave', startAuto);
 }
 
 function productCard(p) {
@@ -234,28 +333,58 @@ function closeCart(){ q('#cart').classList.remove('open'); }
 async function checkout(e){
   e.preventDefault();
   if (CART.length===0) return notify('Your cart is empty');
+
   const btn = e.target.querySelector('button[type="submit"]');
-  btn.disabled = true; btn.textContent = 'Placing Order…';
+  btn.disabled = true;
+  btn.textContent = 'Placing Order…';
+
+  // Show confirmation message immediately on click (inline + toast)
+  const inlineMsg = q('#order-confirm-inline');
+  if (inlineMsg) inlineMsg.hidden = false;
+  notify('Order is Confirmed');
+
   const fd = new FormData(e.target);
   const payload = {
     name: fd.get('name'),
     email: fd.get('email'),
     phone: fd.get('phone'),
     address: fd.get('address'),
-    items: CART.map(({id, grams, qty, price})=>({id, grams, qty, price}))
+    items: CART.map(({id, grams, qty, price}) => ({ id, grams, qty, price }))
   };
-  const res = await fetch('/api/order', { method: 'POST', headers: {'Content-Type':'application/json'}, body: JSON.stringify(payload) });
-  if (!res.ok) { btn.disabled = false; btn.textContent = 'Place Order'; return notify('Failed to place order'); }
-  const data = await res.json();
-  CART = []; saveCart(); renderCart(); closeCart();
-  // Show a brief confirmation state before redirect
-  const cartBox = q('.cart');
-  if (cartBox) cartBox.classList.remove('open');
-  const msg = el('div','order-confirmed');
-  msg.innerHTML = `<h2>Order Confirmed!</h2><p>Order #${data.order_id}</p>`;
-  msg.style.cssText = 'position:fixed;top:50%;left:50%;transform:translate(-50%,-50%);z-index:50;background:var(--card);border:1px solid var(--accent);border-radius:16px;padding:32px;text-align:center;box-shadow:0 8px 32px rgba(0,0,0,0.25);min-width:300px;';
-  document.body.appendChild(msg);
-  setTimeout(() => window.location.href = `/order/${data.order_id}`, 3200);
+
+  try {
+    const res = await fetch('/api/order', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify(payload)
+    });
+
+    if (!res.ok) {
+      btn.disabled = false;
+      btn.textContent = 'Place Order';
+      return notify('Failed to place order');
+    }
+
+    const data = await res.json();
+    CART = [];
+    saveCart();
+    renderCart();
+    closeCart();
+
+    // Also show centered confirmation popup with order id
+    const cartBox = q('.cart');
+    if (cartBox) cartBox.classList.remove('open');
+    const msg = el('div', 'order-confirmed');
+    msg.innerHTML = `<h2>Order is Confirmed</h2><p>Order #${data.order_id}</p>`;
+    msg.style.cssText = 'position:fixed;top:50%;left:50%;transform:translate(-50%,-50%);z-index:250;background:var(--card);border:1px solid var(--accent);border-radius:16px;padding:32px;text-align:center;box-shadow:0 8px 32px rgba(0,0,0,0.25);min-width:300px;';
+    document.body.appendChild(msg);
+    setTimeout(() => window.location.href = `/order/${data.order_id}`, 3200);
+  } catch (err) {
+    console.error('Checkout failed', err);
+    btn.disabled = false;
+    btn.textContent = 'Place Order';
+    notify('Failed to place order');
+  }
 }
 
 // Tracking
@@ -271,6 +400,38 @@ async function track(orderId){
   };
 }
 
+// Simple parallax drift for scroll-gallery track (disabled)
+// (function () {
+//   const track = document.querySelector('.scroll-gallery-track');
+//   if (!track) return;
+
+//   let latestScrollY = window.scrollY || window.pageYOffset;
+//   let drift = 0;
+//   let lastTime = performance.now();
+
+//   window.addEventListener('scroll', () => {
+//     latestScrollY = window.scrollY || window.pageYOffset;
+//   }, { passive: true });
+
+//   function animate(now) {
+//     const dt = now - lastTime;
+//     lastTime = now;
+
+//     const driftSpeed = 8; // px/sec
+//     drift -= (driftSpeed * dt) / 1000;
+
+//     const parallaxFactor = 0.15;
+//     const parallaxOffset = -latestScrollY * parallaxFactor;
+
+//     const translateX = drift + parallaxOffset;
+//     track.style.transform = `translate3d(${translateX}px, 0, 0)`;
+
+//     requestAnimationFrame(animate);
+//   }
+
+//   requestAnimationFrame(animate);
+// })();
+
 // Events
 window.addEventListener('DOMContentLoaded', () => {
   if (q('#products')) {
@@ -281,5 +442,5 @@ window.addEventListener('DOMContentLoaded', () => {
   if (q('#close-cart')) q('#close-cart').addEventListener('click', closeCart);
   if (q('#checkout-form')) q('#checkout-form').addEventListener('submit', checkout);
   if (q('#track-form')) q('#track-form').addEventListener('submit', (e)=>{ e.preventDefault(); const id = q('#track-id').value.trim(); if(id) track(id); });
-  const urlParams = new URLSearchParams(location.search); const oid = urlParams.get('order_id'); if (oid) track(oid);
+  const urlParams = new URLSearchParams(location.search); const oid = urlParams.get('order_id'); if (oid && q('#track-result')) track(oid);
 });

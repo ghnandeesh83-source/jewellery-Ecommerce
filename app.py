@@ -25,8 +25,19 @@ UNSPLASH_ACCESS_KEY = os.getenv("UNSPLASH_ACCESS_KEY", "")
 
 # Load products once
 PRODUCTS_PATH = os.path.join(os.path.dirname(__file__), 'products.json')
-with open(PRODUCTS_PATH, 'r', encoding='utf-8') as f:
-    PRODUCTS = json.load(f)
+
+# Safely load products JSON without crashing the app
+if os.path.exists(PRODUCTS_PATH) and os.path.getsize(PRODUCTS_PATH) > 0:
+    try:
+        with open(PRODUCTS_PATH, 'r', encoding='utf-8') as f:
+            PRODUCTS = json.load(f)
+    except json.JSONDecodeError as e:
+        # Log the error and fall back to an empty list so the app keeps running
+        print(f"Failed to parse products.json: {e}")
+        PRODUCTS = []
+else:
+    # File missing or empty: default to an empty products list
+    PRODUCTS = []
 
 # In-memory order store (demo)
 ORDERS = {}
@@ -101,7 +112,14 @@ def logout():
 
 @app.route('/api/products')
 def api_products():
-    return jsonify(PRODUCTS)
+    # Reload products.json on each request so changes on disk appear
+    try:
+        with open(PRODUCTS_PATH, 'r', encoding='utf-8') as f:
+            current = json.load(f)
+    except Exception:
+        # Fall back to in-memory PRODUCTS if reading fails
+        current = PRODUCTS
+    return jsonify(current)
 
 
 @app.route('/api/send-otp', methods=['POST'])
@@ -274,10 +292,19 @@ def api_chat():
     
     # Try Gemini first
     try:
-        from google import genai
-        client = genai.Client()
+        import google.generativeai as genai
         
-        system_prompt = f"""You are a helpful AI assistant for "Shri Jewellery", a premium jewelry store in India. Here's important information about the store:
+        api_key = os.getenv('GEMINI_API_KEY')
+        genai.configure(api_key=api_key)
+        
+        model = genai.GenerativeModel('gemini-2.0-flash')
+        
+        system_prompt = f"""You are a helpful AI assistant for "Shri Jewellery", a premium jewelry store in India. You can answer ANY question the user asks - not just about jewelry but about anything! Be friendly, helpful, and conversational. You have the ability to search the internet for current gold and silver rates.
+
+IMPORTANT - GOLD RATES INFO:
+- You can search online for the LATEST gold rates in India when user asks about "today's rate", "yesterday's rate", "current rate", or any gold/silver price query
+- If user asks about yesterday's gold rate, please search online and provide the accurate rate for that day
+- Always try to give the most accurate and current rates available online
 
 STORE INFORMATION:
 - Name: Shri Jewellery
@@ -285,16 +312,17 @@ STORE INFORMATION:
 - Phone: +91 90192 31931 / +91 89044 39579
 - We specialize in Gold, Silver, and Diamond jewelry for Women, Men, and Children
 
+BASE RATES REFERENCE (Per Gram):
+- 24K Gold: approximately ₹12,000-13,000
+- 22K Gold: approximately ₹11,000-12,000
+- 18K Gold: approximately ₹9,000-10,000
+- 925 Sterling Silver: approximately ₹80-100
+
 PRODUCT CATALOG:
 - Gold Jewelry: Rings (5g-20g), Chains (10g-35g), Necklaces (10g-30g), Nose pins (1g-3g)
 - Silver Jewelry: Rings (5g-10g), Chains (10g-20g), Necklaces (5g-10g), Nose pins (1g-2g)
 - Diamond Jewelry: Rings (5g-10g), Necklaces (10g-20g), Nose pins (1g-2g)
 - Children's Collection: Gold rings (2g-5g), Silver rings (2g-5g), Gold chains (5g-10g), Silver chains (5g-10g)
-
-PRICING (Base prices, calculated per gram):
-- Gold: Starting from ₹6,500 for children's items, up to ₹144,000 for heavy chains
-- Silver: Starting from ₹240 for nose pins, up to ₹6,000 for chains
-- Diamond: Starting from ₹1,960 for nose pins, up to ₹250,000 for necklaces
 
 SERVICES:
 - Online ordering with order tracking
@@ -303,33 +331,36 @@ SERVICES:
 - 7-day return/exchange policy
 
 User's question: {user_message}
-Provide a helpful, accurate response as Shri Jewellery's AI assistant:"""
+Provide a helpful, friendly response. If user asks about gold/silver rates (today, yesterday, current), search online and provide the latest accurate rates.:"""
         
-        response = client.models.generate_content(
-            model="gemini-2.5-flash",
-            contents=system_prompt
-        )
+        response = model.generate_content(system_prompt, tools=['google_search')]
         
         reply = response.text.strip() if response.text else None
         if reply:
             if len(reply) > 800:
-                reply = reply[:800] + "...\n\nFor more detailed information, please call us at +91 90192 31931."
+                reply = reply[:800] + "...\n\nFor more details, call +91 90192 31931."
             return jsonify({'reply': reply})
     except Exception as e:
         print(f"Gemini API error: {e}")
+        import traceback
+        traceback.print_exc()
     
     # Fallback: Predefined responses for common jewelry queries
     keywords = {
-        'price': 'Our jewelry prices vary by metal type and weight. Gold starts from ₹6,500, Silver from ₹240, and Diamond from ₹1,960. Visit our store or call +91 90192 31931 for current prices.',
-        'gold': 'We offer beautiful gold jewelry including rings, chains, necklaces, and nose pins for women, men, and children. Gold pieces start from ₹6,500. Which item interests you?',
-        'silver': 'Our silver collection includes elegant rings, chains, necklaces, and nose pins starting from ₹240. Perfect for both everyday wear and special occasions!',
-        'diamond': 'We have premium diamond jewelry including rings, necklaces, and nose pins. Diamond pieces start from ₹1,960. Call us for custom designs!',
+        'price': 'CURRENT RATES:\n• 24K Gold: ₹12,500/gram\n• 22K Gold: ₹11,500/gram\n• 18K Gold: ₹9,500/gram\n• 925 Silver: ₹90/gram\n\nCall +91 90192 31931 for diamond pricing!',
+        'gold': 'We offer beautiful gold jewelry including rings, chains, necklaces, and nose pins for women, men, and children. Current 22K Gold rate: ₹11,500/gram. Which item interests you?',
+        'silver': 'Our silver collection includes elegant rings, chains, necklaces, and nose pins. Current 925 Silver rate: ₹90/gram. Perfect for both everyday wear and special occasions!',
+        'diamond': 'We have premium diamond jewelry including rings, necklaces, and nose pins. Call us for custom designs and current diamond pricing!',
         'ring': 'We offer rings in gold, silver, and diamond for women, men, and children. Available in various designs and weights. What type interests you?',
-        'chain': 'Our chains are available in gold, silver, and diamond. Gold chains start from ₹35,000, silver from ₹3,500. What style do you prefer?',
-        'necklace': 'Beautiful necklaces in gold, silver, and diamond. Gold necklaces start from ₹42,000. We have designs for every occasion!',
+        'chain': 'Our chains are available in gold, silver, and diamond. 22K Gold chains from ₹35,000, 925 Silver from ₹3,500. What style do you prefer?',
+        'necklace': 'Beautiful necklaces in gold, silver, and diamond. 22K Gold necklaces from ₹42,000. We have designs for every occasion!',
         'delivery': 'We deliver across India in 3-7 business days. Free shipping on orders above ₹5,000. Call +91 90192 31931 for more details.',
         'return': 'We offer a 7-day return/exchange policy on all jewelry. Contact us at +91 90192 31931 to initiate returns.',
         'children': 'We have a special children\'s jewelry collection in gold and silver with safe, age-appropriate designs. Starting from ₹1,500.',
+        'about': 'Shri Jewellery is a premium jewelry store in Chinya, Nagamangala Taluk, Mandya District on Mysore Main Road. We specialize in Gold, Silver, and Diamond jewelry for all occasions. Current Gold Rate: 22K @ ₹11,500/gram!',
+        'store': 'Shri Jewellery - Your trusted jewelry destination!\n📍 Location: Chinya, Nagamangala Taluk, Mandya District, Mysore Main Road\n📞 Phone: +91 90192 31931 / +91 89044 39579\n\nCurrent Gold Rate: 22K @ ₹11,500/gram',
+        'contact': '📞 Contact Shri Jewellery:\n• Phone: +91 90192 31931\n• Phone: +91 89044 39579\n• Location: Chinya, Nagamangala Taluk, Mandya District, Mysore Main Road\n\nCurrent Gold Rate: 22K @ ₹11,500/gram',
+        'rate': 'CURRENT GOLD RATES:\n• 24K Gold: ₹12,500/gram\n• 22K Gold: ₹11,500/gram\n• 18K Gold: ₹9,500/gram\n• 925 Sterling Silver: ₹90/gram\n\nPrices are indicative. Contact +91 90192 31931 for exact pricing!',
     }
     
     for keyword, response_text in keywords.items():
