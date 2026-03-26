@@ -333,7 +333,7 @@ SERVICES:
 User's question: {user_message}
 Provide a helpful, friendly response. If user asks about gold/silver rates (today, yesterday, current), search online and provide the latest accurate rates.:"""
         
-        response = model.generate_content(system_prompt, tools=['google_search')]
+        response = model.generate_content(system_prompt)
         
         reply = response.text.strip() if response.text else None
         if reply:
@@ -342,8 +342,8 @@ Provide a helpful, friendly response. If user asks about gold/silver rates (toda
             return jsonify({'reply': reply})
     except Exception as e:
         print(f"Gemini API error: {e}")
-        import traceback
-        traceback.print_exc()
+        # Return a friendly error message
+        return jsonify({'reply': 'Sorry, I\'m having trouble processing your request right now. Please try asking about gold rates, silver prices, or our products! You can also call us at +91 90192 31931.'})
     
     # Fallback: Predefined responses for common jewelry queries
     keywords = {

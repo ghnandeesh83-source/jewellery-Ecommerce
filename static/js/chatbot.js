@@ -136,11 +136,26 @@
     addBubble('Hello! Welcome to Shri Jewellery! ✨<br><br>I\'m your AI assistant, powered by advanced technology to help you with:<br>• Product recommendations and pricing<br>• Delivery and order information<br>• Sizing and care instructions<br>• Store details and contact info<br>• Any questions about our jewelry collection<br><br>Ask me anything about our gold, silver, and diamond pieces!', false);
   }, 800);
   
+  // Block image paste/drop
+  input.addEventListener('paste', (e) => {
+    if (e.clipboardData.files.length > 0) {
+      e.preventDefault();
+      addBubble('Sorry, I can only read text messages. Please type your question instead!', false);
+    }
+  });
+  
   // Form submission
   form.addEventListener('submit', async (e) => {
     e.preventDefault();
     const text = input.value.trim();
     if (!text) return;
+    
+    // Check if user is trying to send an image reference
+    if (text.match(/\.(png|jpg|jpeg|gif|webp)$/i) || text.includes('image.png') || text.includes('image:')) {
+      addBubble('Sorry, I can only read text messages. Please type your question instead!', true);
+      input.value = '';
+      return;
+    }
     
     // Add user message
     addBubble(text, true);
@@ -162,10 +177,15 @@
       // Remove typing indicator
       typingBubble.remove();
       
-      // Add bot response with delay for realism
-      setTimeout(() => {
-        addBubble(data.reply || 'Sorry, I\'m having trouble responding right now. Please try calling us at +91 90192 31931.');
-      }, 500);
+      // Check if there's an error in the response
+      if (data.error) {
+        addBubble('Sorry, I\'m having trouble understanding that. Please try asking about gold rates, silver prices, or our products!', false);
+      } else {
+        // Add bot response with delay for realism
+        setTimeout(() => {
+          addBubble(data.reply || 'Sorry, I\'m having trouble responding right now. Please try calling us at +91 90192 31931.');
+        }, 500);
+      }
       
     } catch (error) {
       console.error('Chat error:', error);
