@@ -6,3 +6,4 @@ twilio>=9.0.0
 Authlib>=1.0.0
 Werkzeug>=3.0.0
 gunicorn>=21.0.0
+google-generativeai>=0.8.0

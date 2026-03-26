@@ -1,0 +1,36 @@
+name: Flask App
+
+on:
+  push:
+    branches: [ main ]
+  pull_request:
+    branches: [ main ]
+  workflow_dispatch:
+
+jobs:
+  run:
+    runs-on: ubuntu-latest
+    steps:
+    - uses: actions/checkout@v4
+    
+    - name: Set up Python
+      uses: actions/setup-python@v5
+      with:
+        python-version: '3.10'
+    
+    - name: Install dependencies
+      run: |
+        pip install flask python-dotenv flask-mail twilio google-generativeai
+    
+    - name: Create .env file
+      run: |
+        echo "GEMINI_API_KEY=${{ secrets.GEMINI_API_KEY }}" >> .env
+        echo "UNSPLASH_ACCESS_KEY=${{ secrets.UNSPLASH_ACCESS_KEY }}" >> .env
+        echo "SECRET_KEY=github-actions-secret" >> .env
+    
+    - name: Run the app
+      run: |
+        pip install -r requirements.txt 2>/dev/null || true
+        python app.py &
+        sleep 5
+        curl -s http://127.0.0.1:5000 | head -20
