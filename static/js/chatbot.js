@@ -150,8 +150,12 @@
     const text = input.value.trim();
     if (!text) return;
     
-    // Check if user is trying to send an image reference
-    if (text.match(/\.(png|jpg|jpeg|gif|webp)$/i) || text.includes('image.png') || text.includes('image:')) {
+    // Block image/file references
+    if (text.match(/\.(png|jpg|jpeg|gif|webp)$/i) || 
+        text.includes('image.png') || 
+        text.includes('image:') ||
+        text.includes('image/jpeg') ||
+        text.includes('cannot read')) {
       addBubble('Sorry, I can only read text messages. Please type your question instead!', true);
       input.value = '';
       return;
