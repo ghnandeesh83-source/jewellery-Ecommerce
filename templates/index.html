@@ -54,6 +54,19 @@
   <div id="cart-items"></div>
   <div class="cart-footer">
     <div class="total"><span>Total:</span> <strong id="cart-total">₹0</strong></div>
+    <div id="voucher-section" style="margin-bottom: 10px;">
+      <div style="display:flex;gap:8px;">
+        <input id="voucher-code" name="voucher_code" placeholder="Gift Voucher Code" style="flex:1;padding:10px;background:#0c1220;border:1px solid #283257;color:var(--text);border-radius:8px;" />
+        <button type="button" id="apply-voucher" class="btn" style="padding:10px 15px;">Apply</button>
+      </div>
+      <div id="voucher-result" style="margin-top:8px;font-size:13px;"></div>
+      <div id="voucher-discount" style="color:#4caf50;font-weight:bold;margin-top:5px;display:none;">
+        Discount Applied: <span id="discount-amount">₹0</span>
+      </div>
+    </div>
+    <div class="total" id="final-total-section" style="display:none;">
+      <span>Final Total:</span> <strong id="final-total" style="color:#4caf50;">₹0</strong>
+    </div>
     <form id="checkout-form" class="checkout-form">
       <input required name="name" placeholder="Full name" />
       <input required name="email" type="email" placeholder="Email" />

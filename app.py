@@ -215,28 +215,63 @@ def api_create_order():
     phone = data.get('phone')
     address = data.get('address')
     items = data.get('items', [])
+    voucher_code = data.get('voucher_code')
+    voucher_discount = float(data.get('voucher_discount', 0))
 
     order_id = uuid.uuid4().hex[:10].upper()
-    ORDERS[order_id] = {
+    
+    # Calculate total
+    subtotal = sum(item.get('price', 0) * item.get('qty', 1) for item in items)
+    total = subtotal - voucher_discount
+    
+    order = {
         'id': order_id,
         'name': name,
         'email': email,
         'phone': phone,
         'address': address,
         'items': items,
+        'subtotal': subtotal,
+        'voucher_code': voucher_code,
+        'voucher_discount': voucher_discount,
+        'total': total,
         'status': 'Confirmed',
         'created_at': datetime.now(UTC).isoformat()
     }
+    
+    # Redeem voucher if applied
+    if voucher_code and voucher_discount > 0:
+        voucher = VOUCHERS.get(voucher_code.upper())
+        if voucher and voucher['balance'] >= voucher_discount:
+            voucher['balance'] -= voucher_discount
+            voucher['used_amount'] += voucher_discount
+            voucher['transactions'].append({
+                'type': 'redeem',
+                'amount': voucher_discount,
+                'order_id': order_id,
+                'date': datetime.now(UTC).isoformat()
+            })
+            if voucher['balance'] <= 0:
+                voucher['status'] = 'fully_redeemed'
+            order['voucher_applied'] = True
+        else:
+            order['voucher_applied'] = False
+    else:
+        order['voucher_applied'] = False
+    
+    ORDERS[order_id] = order
 
     # Notify (best-effort, optional)
     try:
         if email:
-            send_email(email, f"Order {order_id} Confirmed", f"Thank you {name}! Your order {order_id} is confirmed.")
+            discount_msg = f"\nVoucher Discount: -₹{voucher_discount}" if voucher_discount > 0 else ""
+            send_email(email, f"Order {order_id} Confirmed", 
+                      f"Thank you {name}! Your order {order_id} is confirmed.\n\nSubtotal: ₹{subtotal}{discount_msg}\nTotal: ₹{total}\n\nTrack: {request.host_url}track?order_id={order_id}")
     except Exception:
         pass
     try:
         if phone:
-            send_sms(phone, f"Order {order_id} confirmed. Thank you for shopping with us!")
+            send_sms(phone, f"Order {order_id} confirmed. Total: ₹{total}. Thank you for shopping with us!")
     except Exception:
         pass
 
@@ -546,6 +581,144 @@ def api_chat():
     
     # Default response
     return jsonify({'reply': '👋 Hello! I\'m here to help!\n\nI can assist with:\n• Gold & silver rates\n• Product info\n• Orders & delivery\n• Gift vouchers\n• Store information\n\nWhat would you like to know?\n\nCall: +91 6363650179'})
+
+
+# ==================== ADMIN PANEL ====================
+
+@app.route('/admin')
+def admin():
+    """Admin dashboard - requires admin login"""
+    return render_template('admin.html', orders=ORDERS, vouchers=VOUCHERS, products=PRODUCTS)
+
+
+@app.route('/api/admin/login', methods=['POST'])
+def api_admin_login():
+    """Admin login"""
+    data = request.get_json(force=True)
+    username = data.get('username', '').strip()
+    password = data.get('password', '').strip()
+    
+    admin_user = os.getenv('ADMIN_USER', 'admin')
+    admin_pass = os.getenv('ADMIN_PASS', 'admin123')
+    
+    if username == admin_user and password == admin_pass:
+        session['admin'] = True
+        return jsonify({'success': True})
+    
+    return jsonify({'error': 'Invalid credentials'}), 401
+
+
+@app.route('/api/admin/logout')
+def api_admin_logout():
+    session.pop('admin', None)
+    return jsonify({'success': True})
+
+
+@app.route('/api/admin/orders')
+def api_admin_orders():
+    """Get all orders"""
+    orders_list = [{**order, 'code': code} for code, order in ORDERS.items()]
+    orders_list.sort(key=lambda x: x.get('created_at', ''), reverse=True)
+    return jsonify(orders_list)
+
+
+@app.route('/api/admin/order/<order_id>/status', methods=['POST'])
+def api_admin_update_order_status(order_id):
+    """Update order status"""
+    data = request.get_json(force=True)
+    new_status = data.get('status', '')
+    
+    if order_id in ORDERS:
+        ORDERS[order_id]['status'] = new_status
+        return jsonify({'success': True, 'order': ORDERS[order_id]})
+    
+    return jsonify({'error': 'Order not found'}), 404
+
+
+@app.route('/api/admin/vouchers')
+def api_admin_vouchers():
+    """Get all vouchers"""
+    vouchers_list = [{**voucher, 'code': code} for code, voucher in VOUCHERS.items()]
+    vouchers_list.sort(key=lambda x: x.get('created_at', ''), reverse=True)
+    return jsonify(vouchers_list)
+
+
+@app.route('/api/admin/voucher/create', methods=['POST'])
+def api_admin_create_voucher():
+    """Admin creates a voucher"""
+    data = request.get_json(force=True)
+    
+    amount = int(data.get('amount', 0))
+    if amount < 100:
+        return jsonify({'error': 'Invalid amount'}), 400
+    
+    sender_name = data.get('sender_name', 'Admin').strip()
+    recipient_name = data.get('recipient_name', '').strip()
+    recipient_phone = data.get('recipient_phone', '').strip()
+    message = data.get('message', 'Gift from Shri Jewellery').strip()
+    theme = data.get('theme', 'default')
+    
+    voucher_code = f"SJ-{uuid.uuid4().hex[:8].upper()}"
+    expiry_date = datetime.now(UTC).replace(year=datetime.now().year + 1)
+    
+    voucher = {
+        'code': voucher_code,
+        'amount': amount,
+        'balance': amount,
+        'sender_name': sender_name,
+        'sender_phone': 'ADMIN',
+        'recipient_name': recipient_name,
+        'recipient_phone': recipient_phone,
+        'recipient_email': '',
+        'message': message,
+        'theme': theme,
+        'delivery_method': 'inapp',
+        'delivery_date': datetime.now().strftime('%Y-%m-%d'),
+        'status': 'active',
+        'used_amount': 0,
+        'created_at': datetime.now(UTC).isoformat(),
+        'expiry_date': expiry_date.isoformat(),
+        'transactions': []
+    }
+    
+    VOUCHERS[voucher_code] = voucher
+    
+    return jsonify({'success': True, 'voucher': voucher}), 201
+
+
+@app.route('/api/admin/voucher/<code>/deactivate', methods=['POST'])
+def api_admin_deactivate_voucher(code):
+    """Deactivate a voucher"""
+    code = code.upper()
+    if code in VOUCHERS:
+        VOUCHERS[code]['status'] = 'deactivated'
+        return jsonify({'success': True})
+    return jsonify({'error': 'Voucher not found'}), 404
+
+
+@app.route('/api/admin/stats')
+def api_admin_stats():
+    """Get dashboard stats"""
+    total_orders = len(ORDERS)
+    total_revenue = sum(order.get('total', 0) for order in ORDERS.values())
+    total_vouchers = len(VOUCHERS)
+    active_vouchers = sum(1 for v in VOUCHERS.values() if v.get('status') == 'active')
+    voucher_value = sum(v.get('balance', 0) for v in VOUCHERS.values())
+    
+    pending_orders = sum(1 for o in ORDERS.values() if o.get('status') == 'Confirmed')
+    shipped_orders = sum(1 for o in ORDERS.values() if o.get('status') == 'Shipped')
+    delivered_orders = sum(1 for o in ORDERS.values() if o.get('status') == 'Delivered')
+    
+    return jsonify({
+        'total_orders': total_orders,
+        'total_revenue': total_revenue,
+        'total_vouchers': total_vouchers,
+        'active_vouchers': active_vouchers,
+        'voucher_value': voucher_value,
+        'pending_orders': pending_orders,
+        'shipped_orders': shipped_orders,
+        'delivered_orders': delivered_orders
+    })
 
 
 if __name__ == '__main__':

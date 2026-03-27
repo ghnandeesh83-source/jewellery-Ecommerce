@@ -1,6 +1,7 @@
 // Main storefront logic: render products, manage cart, checkout, track
 let PRODUCTS = [];
 let CART = JSON.parse(localStorage.getItem('CART') || '[]');
+let VOUCHER_STATE = { applied: false, code: '', discount: 0, balance: 0 };
 
 const q = sel => document.querySelector(sel);
 const el = (tag, cls) => { const n = document.createElement(tag); if (cls) n.className = cls; return n; };
@@ -330,6 +331,71 @@ function renderCart(){
 function openCart(){ q('#cart').classList.add('open'); }
 function closeCart(){ q('#cart').classList.remove('open'); }
 
+// Voucher functions
+async function applyVoucher() {
+  const code = q('#voucher-code').value.trim().toUpperCase();
+  const resultDiv = q('#voucher-result');
+  const discountDiv = q('#voucher-discount');
+  const discountAmount = q('#discount-amount');
+  const finalTotalSection = q('#final-total-section');
+  const finalTotal = q('#final-total');
+  
+  if (!code) {
+    resultDiv.innerHTML = '<span style="color:#ff6b6b;">Please enter a voucher code</span>';
+    return;
+  }
+  
+  resultDiv.innerHTML = '<span style="color:#aaa;">Validating...</span>';
+  
+  try {
+    const res = await fetch('/api/voucher/validate', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ code })
+    });
+    
+    const data = await res.json();
+    
+    if (!data.valid) {
+      resultDiv.innerHTML = `<span style="color:#ff6b6b;">❌ ${data.error}</span>`;
+      VOUCHER_STATE = { applied: false, code: '', discount: 0, balance: 0 };
+      discountDiv.style.display = 'none';
+      finalTotalSection.style.display = 'none';
+      updateCartTotals();
+      return;
+    }
+    
+    const cartTotal = CART.reduce((sum, it) => sum + it.qty * it.price, 0);
+    const discount = Math.min(data.balance, cartTotal);
+    
+    VOUCHER_STATE = { applied: true, code, discount, balance: data.balance };
+    
+    resultDiv.innerHTML = `<span style="color:#4caf50;">✅ ${data.recipient_name}'s voucher - ₹${data.balance} available</span>`;
+    discountAmount.textContent = money(discount);
+    discountDiv.style.display = 'block';
+    finalTotalSection.style.display = 'block';
+    finalTotal.textContent = money(cartTotal - discount);
+    
+    updateCartTotals();
+    
+  } catch (err) {
+    resultDiv.innerHTML = '<span style="color:#ff6b6b;">Error validating voucher</span>';
+  }
+}
+
+function updateCartTotals() {
+  const cartTotal = CART.reduce((sum, it) => sum + it.qty * it.price, 0);
+  q('#cart-total').textContent = money(cartTotal);
+  
+  if (VOUCHER_STATE.applied) {
+    const finalTotal = q('#final-total');
+    const discountAmount = q('#discount-amount');
+    const discount = Math.min(VOUCHER_STATE.discount, cartTotal);
+    discountAmount.textContent = money(discount);
+    finalTotal.textContent = money(cartTotal - discount);
+  }
+}
+
 async function checkout(e){
   e.preventDefault();
   if (CART.length===0) return notify('Your cart is empty');
@@ -442,5 +508,6 @@ window.addEventListener('DOMContentLoaded', () => {
   if (q('#close-cart')) q('#close-cart').addEventListener('click', closeCart);
   if (q('#checkout-form')) q('#checkout-form').addEventListener('submit', checkout);
   if (q('#track-form')) q('#track-form').addEventListener('submit', (e)=>{ e.preventDefault(); const id = q('#track-id').value.trim(); if(id) track(id); });
+  if (q('#apply-voucher')) q('#apply-voucher').addEventListener('click', applyVoucher);
   const urlParams = new URLSearchParams(location.search); const oid = urlParams.get('order_id'); if (oid && q('#track-result')) track(oid);
 });
