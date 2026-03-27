@@ -1,733 +1,153 @@
 {% extends 'layout.html' %}
 
-{% block extra_head %}
-<style>
-.location-page {
-    max-width: 1200px;
-    margin: 0 auto;
-    padding: 20px;
-}
-
-.location-header {
-    text-align: center;
-    margin-bottom: 30px;
-    padding: 30px 20px;
-    background: linear-gradient(135deg, rgba(212, 175, 55, 0.1) 0%, rgba(184, 134, 11, 0.05) 100%);
-    border-radius: 16px;
-    border: 1px solid rgba(212, 175, 55, 0.2);
-}
-
-.location-header h1 {
-    color: var(--accent);
-    font-size: 2.2rem;
-    margin-bottom: 8px;
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    gap: 15px;
-}
-
-.location-header h1::before,
-.location-header h1::after {
-    content: '✨';
-    font-size: 1.5rem;
-}
-
-.location-header p {
-    color: var(--muted);
-    font-size: 1.1rem;
-    margin: 0;
-}
-
-.location-container {
-    display: grid;
-    grid-template-columns: 1fr 340px;
-    gap: 25px;
-    align-items: start;
-}
-
-@media (max-width: 968px) {
-    .location-container {
-        grid-template-columns: 1fr;
-    }
-}
-
-.map-section {
-    background: var(--card);
-    border-radius: 20px;
-    overflow: hidden;
-    box-shadow: 0 8px 32px rgba(0, 0, 0, 0.3);
-    border: 1px solid rgba(212, 175, 55, 0.3);
-}
-
-#map {
-    width: 100%;
-    height: 480px;
-    border-radius: 20px;
-}
-
-@media (max-width: 600px) {
-    #map {
-        height: 320px;
-    }
-    
-    .location-header h1 {
-        font-size: 1.6rem;
-    }
-}
-
-.shop-info-panel {
-    display: flex;
-    flex-direction: column;
-    gap: 20px;
-}
-
-.shop-card {
-    background: var(--card);
-    border-radius: 20px;
-    padding: 25px;
-    box-shadow: 0 8px 32px rgba(0, 0, 0, 0.2);
-    border: 1px solid rgba(212, 175, 55, 0.3);
-    position: relative;
-    overflow: hidden;
-}
-
-.shop-card::before {
-    content: '';
-    position: absolute;
-    top: 0;
-    left: 0;
-    right: 0;
-    height: 4px;
-    background: linear-gradient(90deg, #d4af37, #b8860b, #d4af37);
-}
-
-.shop-card h2 {
-    color: var(--accent);
-    margin-bottom: 20px;
-    font-size: 1.4rem;
-    display: flex;
-    align-items: center;
-    gap: 10px;
-}
-
-.shop-details {
-    display: flex;
-    flex-direction: column;
-    gap: 12px;
-    margin-bottom: 20px;
-}
-
-.detail-item {
-    display: flex;
-    align-items: flex-start;
-    gap: 12px;
-    padding: 12px 15px;
-    background: rgba(255, 255, 255, 0.03);
-    border-radius: 12px;
-    border: 1px solid rgba(255, 255, 255, 0.05);
-    transition: all 0.3s;
-}
-
-.detail-item:hover {
-    background: rgba(212, 175, 55, 0.08);
-    border-color: rgba(212, 175, 55, 0.2);
-}
-
-.detail-icon {
-    font-size: 1.3rem;
-    min-width: 28px;
-    text-align: center;
-}
-
-.detail-text {
-    flex: 1;
-}
-
-.detail-label {
-    font-size: 0.75rem;
-    color: var(--muted);
-    margin-bottom: 3px;
-    text-transform: uppercase;
-    letter-spacing: 0.5px;
-}
-
-.detail-value {
-    font-weight: 500;
-    color: var(--text);
-    font-size: 0.95rem;
-}
-
-.action-buttons {
-    display: flex;
-    flex-direction: column;
-    gap: 12px;
-}
-
-.btn-direction {
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    gap: 12px;
-    padding: 16px 24px;
-    background: linear-gradient(135deg, #d4af37 0%, #b8860b 100%);
-    color: #0f1424;
-    border: none;
-    border-radius: 14px;
-    font-size: 1rem;
-    font-weight: 700;
-    cursor: pointer;
-    text-decoration: none;
-    transition: all 0.3s;
-    box-shadow: 0 4px 15px rgba(212, 175, 55, 0.3);
-}
-
-.btn-direction:hover {
-    transform: translateY(-3px);
-    box-shadow: 0 8px 25px rgba(212, 175, 55, 0.5);
-}
-
-.btn-call {
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    gap: 12px;
-    padding: 14px 20px;
-    background: transparent;
-    color: var(--accent);
-    border: 2px solid var(--accent);
-    border-radius: 14px;
-    font-size: 1rem;
-    font-weight: 600;
-    cursor: pointer;
-    transition: all 0.3s;
-    text-decoration: none;
-}
-
-.btn-call:hover {
-    background: var(--accent);
-    color: var(--bg);
-    transform: translateY(-2px);
-}
-
-.user-location-card {
-    background: var(--card);
-    border-radius: 20px;
-    padding: 22px;
-    box-shadow: 0 8px 32px rgba(0, 0, 0, 0.2);
-    border: 1px solid rgba(212, 175, 55, 0.3);
-}
-
-.user-location-card h3 {
-    color: var(--accent);
-    margin-bottom: 15px;
-    font-size: 1.1rem;
-    display: flex;
-    align-items: center;
-    gap: 8px;
-}
-
-.location-status {
-    padding: 14px;
-    border-radius: 12px;
-    text-align: center;
-    margin-bottom: 15px;
-    font-size: 0.9rem;
-}
-
-.location-status.detecting {
-    background: rgba(212, 175, 55, 0.1);
-    color: var(--accent);
-    border: 1px dashed rgba(212, 175, 55, 0.3);
-}
-
-.location-status.found {
-    background: rgba(76, 175, 80, 0.15);
-    color: #4caf50;
-    border: 1px solid rgba(76, 175, 80, 0.3);
-}
-
-.location-status.error {
-    background: rgba(244, 67, 54, 0.1);
-    color: #f44336;
-    border: 1px solid rgba(244, 67, 54, 0.3);
-}
-
-.distance-info {
-    display: none;
-    text-align: center;
-    padding: 18px;
-    background: linear-gradient(135deg, rgba(212, 175, 55, 0.15) 0%, rgba(184, 134, 11, 0.1) 100%);
-    border-radius: 14px;
-    margin-top: 12px;
-    border: 1px solid rgba(212, 175, 55, 0.2);
-}
-
-.distance-info.show {
-    display: block;
-    animation: fadeIn 0.4s ease;
-}
-
-@keyframes fadeIn {
-    from { opacity: 0; transform: translateY(-10px); }
-    to { opacity: 1; transform: translateY(0); }
-}
-
-.distance-value {
-    font-size: 2.2rem;
-    font-weight: 800;
-    color: var(--accent);
-    margin-bottom: 5px;
-}
-
-.distance-label {
-    color: var(--muted);
-    font-size: 0.85rem;
-}
-
-.btn-get-location {
-    width: 100%;
-    padding: 14px;
-    background: linear-gradient(135deg, #d4af37 0%, #b8860b 100%);
-    color: #0f1424;
-    border: none;
-    border-radius: 12px;
-    font-weight: 700;
-    font-size: 0.95rem;
-    cursor: pointer;
-    transition: all 0.3s;
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    gap: 8px;
-}
-
-.btn-get-location:hover {
-    transform: translateY(-2px);
-    box-shadow: 0 6px 20px rgba(212, 175, 55, 0.4);
-}
-
-.btn-get-location:disabled {
-    opacity: 0.6;
-    cursor: not-allowed;
-    transform: none;
-}
-
-.shop-hours {
-    background: var(--card);
-    border-radius: 20px;
-    padding: 22px;
-    box-shadow: 0 8px 32px rgba(0, 0, 0, 0.2);
-    border: 1px solid rgba(212, 175, 55, 0.3);
-}
-
-.shop-hours h3 {
-    color: var(--accent);
-    margin-bottom: 18px;
-    font-size: 1.1rem;
-    display: flex;
-    align-items: center;
-    gap: 10px;
-}
-
-.hours-table {
-    width: 100%;
-}
-
-.hours-row {
-    display: flex;
-    justify-content: space-between;
-    align-items: center;
-    padding: 10px 12px;
-    border-radius: 8px;
-    margin-bottom: 4px;
-    transition: all 0.3s;
-}
-
-.hours-row:hover {
-    background: rgba(255, 255, 255, 0.03);
-}
-
-.hours-row:last-child {
-    margin-bottom: 0;
-}
-
-.hours-row .day {
-    color: var(--text);
-    font-weight: 500;
-}
-
-.hours-row .time {
-    color: var(--muted);
-    font-size: 0.9rem;
-}
-
-.hours-row.today {
-    background: rgba(212, 175, 55, 0.15);
-    border: 1px solid rgba(212, 175, 55, 0.2);
-}
-
-.hours-row.today .day,
-.hours-row.today .time {
-    color: var(--accent);
-    font-weight: 700;
-}
-
-.operating-status {
-    display: inline-block;
-    padding: 5px 14px;
-    border-radius: 20px;
-    font-size: 0.8rem;
-    font-weight: 700;
-    margin-left: auto;
-}
-
-.operating-status.open {
-    background: rgba(76, 175, 80, 0.2);
-    color: #4caf50;
-    animation: pulse 2s infinite;
-}
-
-.operating-status.closed {
-    background: rgba(244, 67, 54, 0.2);
-    color: #f44336;
-}
-
-@keyframes pulse {
-    0%, 100% { opacity: 1; }
-    50% { opacity: 0.7; }
-}
-</style>
-{% endblock %}
-
 {% block content %}
-<div class="location-page">
-    <div class="location-header">
-        <h1>Visit Our Store</h1>
-        <p>Experience our beautiful jewelry collection in person</p>
-    </div>
+<style>
+    body { margin: 0; font-family: Arial, sans-serif; }
+    #map { height: 100vh; width: 100%; }
+    .top-bar {
+        position: absolute;
+        top: 20px;
+        left: 50%;
+        transform: translateX(-50%);
+        z-index: 10;
+        background: linear-gradient(135deg, #d4af37, #b8860b);
+        padding: 15px 30px;
+        border-radius: 50px;
+        box-shadow: 0 4px 20px rgba(0,0,0,0.3);
+    }
+    .top-bar h1 { margin: 0; color: #0f1424; font-size: 1.5rem; }
+    .info-panel {
+        position: absolute;
+        bottom: 20px;
+        left: 20px;
+        z-index: 10;
+        background: rgba(15, 20, 36, 0.95);
+        padding: 20px;
+        border-radius: 16px;
+        color: white;
+        max-width: 300px;
+        border: 1px solid #d4af37;
+        box-shadow: 0 4px 20px rgba(0,0,0,0.3);
+    }
+    .info-panel h2 { margin: 0 0 10px 0; color: #d4af37; }
+    .info-panel p { margin: 5px 0; font-size: 14px; }
+    .btn-dir {
+        position: absolute;
+        bottom: 20px;
+        right: 20px;
+        z-index: 10;
+        background: linear-gradient(135deg, #d4af37, #b8860b);
+        color: #0f1424;
+        padding: 15px 25px;
+        border-radius: 50px;
+        cursor: pointer;
+        font-weight: bold;
+        border: none;
+        box-shadow: 0 4px 20px rgba(212,175,55,0.4);
+    }
+    .btn-dir:hover { transform: scale(1.05); }
+    .distance-badge {
+        position: absolute;
+        top: 80px;
+        left: 50%;
+        transform: translateX(-50%);
+        z-index: 10;
+        background: rgba(15, 20, 36, 0.95);
+        padding: 10px 20px;
+        border-radius: 25px;
+        color: #d4af37;
+        font-weight: bold;
+        display: none;
+        border: 1px solid #d4af37;
+    }
+</style>
 
-    <div class="location-container">
-        <div class="map-section">
-            <div id="map"></div>
-        </div>
+<div id="map"></div>
 
-        <div class="shop-info-panel">
-            <div class="shop-card">
-                <h2>🏪 Shri Jewellery</h2>
-                <div class="shop-details">
-                    <div class="detail-item">
-                        <span class="detail-icon">📍</span>
-                        <div class="detail-text">
-                            <div class="detail-label">Address</div>
-                            <div class="detail-value">Chinya Post Office, PP32+J2X, Honakere, Karnataka 571431</div>
-                        </div>
-                    </div>
-                    <div class="detail-item">
-                        <span class="detail-icon">📞</span>
-                        <div class="detail-text">
-                            <div class="detail-label">Phone</div>
-                            <div class="detail-value">+91 6363650179</div>
-                        </div>
-                    </div>
-                    <div class="detail-item">
-                        <span class="detail-icon">📞</span>
-                        <div class="detail-text">
-                            <div class="detail-label">Alternate</div>
-                            <div class="detail-value">+91 89044 39579</div>
-                        </div>
-                    </div>
-                </div>
-                <div class="action-buttons">
-                    <a href="https://www.google.com/maps/dir/?api=1&destination=12.7716,76.5173" target="_blank" class="btn-direction">
-                        🚗 Get Directions
-                    </a>
-                    <a href="tel:+916363650179" class="btn-call">
-                        📞 Call Now
-                    </a>
-                </div>
-            </div>
-
-            <div class="user-location-card">
-                <h3>📱 Your Location</h3>
-                <div id="location-status" class="location-status detecting">
-                    Click below to find distance from you
-                </div>
-                <button id="btn-find-location" class="btn-get-location" onclick="getUserLocation()">
-                    📍 Find My Location
-                </button>
-                <div id="distance-info" class="distance-info">
-                    <div class="distance-value" id="distance-value">--</div>
-                    <div class="distance-label">from our store</div>
-                </div>
-            </div>
-
-            <div class="shop-hours">
-                <h3>
-                    🕐 Store Hours 
-                    <span id="operating-status" class="operating-status"></span>
-                </h3>
-                <div class="hours-table">
-                    <div class="hours-row" data-day="0"><span class="day">Sunday</span><span class="time">Closed</span></div>
-                    <div class="hours-row" data-day="1"><span class="day">Monday</span><span class="time">10:00 AM - 8:00 PM</span></div>
-                    <div class="hours-row" data-day="2"><span class="day">Tuesday</span><span class="time">10:00 AM - 8:00 PM</span></div>
-                    <div class="hours-row" data-day="3"><span class="day">Wednesday</span><span class="time">10:00 AM - 8:00 PM</span></div>
-                    <div class="hours-row" data-day="4"><span class="day">Thursday</span><span class="time">10:00 AM - 8:00 PM</span></div>
-                    <div class="hours-row" data-day="5"><span class="day">Friday</span><span class="time">10:00 AM - 8:00 PM</span></div>
-                    <div class="hours-row" data-day="6"><span class="day">Saturday</span><span class="time">10:00 AM - 8:00 PM</span></div>
-                </div>
-            </div>
-        </div>
-    </div>
+<div class="top-bar">
+    <h1>💎 Shri Jewellery</h1>
 </div>
-{% endblock %}
 
-{% block scripts %}
+<div class="distance-badge" id="distance-badge"></div>
+
+<div class="info-panel">
+    <h2>🏪 Shri Jewellery</h2>
+    <p>📍 Chinya Post Office</p>
+    <p>📍 PP32+J2X, Honakere</p>
+    <p>📍 Karnataka 571431</p>
+    <p>📞 +91 6363650179</p>
+    <p>📞 +91 89044 39579</p>
+</div>
+
+<button class="btn-dir" onclick="openDirections()">🚗 Get Directions</button>
+
 <script>
-// Shop location coordinates - Chinya Post Office, Honakere, Karnataka
-const SHOP_LOCATION = {
-    lat: 12.7716,
-    lng: 76.5173,
-    name: 'Shri Jewellery',
-    address: 'Chinya Post Office, PP32+J2X, Honakere, Karnataka 571431',
-    phone: '+91 6363650179'
-};
+    let map, userMarker, shopMarker;
+    const shopLocation = { lat: 12.7716, lng: 76.5173 };
 
-let map;
-let userMarker;
-let shopMarker;
-let directionLine;
+    function initMap() {
+        map = new google.maps.Map(document.getElementById("map"), {
+            center: shopLocation,
+            zoom: 16,
+            styles: [
+                { elementType: "geometry", stylers: [{ color: "#212121" }] },
+                { elementType: "labels.text.stroke", stylers: [{ color: "#212121" }] },
+                { elementType: "labels.text.fill", stylers: [{ color: "#757575" }] },
+                { featureType: "road", elementType: "geometry", stylers: [{ color: "#38414e" }] },
+                { featureType: "water", elementType: "geometry", stylers: [{ color: "#17263c" }] }
+            ]
+        });
 
-function initMap() {
-    // Create map centered on shop location with dark theme styling
-    map = new google.maps.Map(document.getElementById('map'), {
-        zoom: 16,
-        center: SHOP_LOCATION,
-        mapTypeControl: false,
-        streetViewControl: false,
-        fullscreenControl: true,
-        styles: [
-            { elementType: "geometry", stylers: [{ color: "#1a1a2e" }] },
-            { elementType: "labels.text.stroke", stylers: [{ color: "#1a1a2e" }] },
-            { elementType: "labels.text.fill", stylers: [{ color: "#746855" }] },
-            { featureType: "road", elementType: "geometry", stylers: [{ color: "#2d2d44" }] },
-            { featureType: "road", elementType: "geometry.stroke", stylers: [{ color: "#1a1a2e" }] },
-            { featureType: "water", elementType: "geometry", stylers: [{ color: "#0f0f23" }] }
-        ]
-    });
+        shopMarker = new google.maps.Marker({
+            position: shopLocation,
+            map: map,
+            icon: {
+                path: google.maps.SymbolPath.CIRCLE,
+                scale: 20,
+                fillColor: '#d4af37',
+                fillOpacity: 1,
+                strokeColor: '#fff',
+                strokeWeight: 3
+            },
+            title: "Shri Jewellery"
+        });
 
-    // Custom shop marker with golden color
-    shopMarker = new google.maps.Marker({
-        position: SHOP_LOCATION,
-        map: map,
-        icon: {
-            path: google.maps.SymbolPath.CIRCLE,
-            scale: 18,
-            fillColor: '#d4af37',
-            fillOpacity: 1,
-            strokeColor: '#ffffff',
-            strokeWeight: 4,
-        },
-        title: SHOP_LOCATION.name,
-        animation: google.maps.Animation.DROP
-    });
+        const infoWindow = new google.maps.InfoWindow({
+            content: '<div style="padding:10px;"><h3 style="color:#d4af37;">🏪 Shri Jewellery</h3><p>📍 Chinya Post Office, Honakere</p><p>📞 +91 6363650179</p></div>'
+        });
 
-    // Info window for shop marker
-    const infoWindow = new google.maps.InfoWindow({
-        content: `
-            <div style="padding: 18px; min-width: 220px; font-family: 'Inter', sans-serif;">
-                <h3 style="color: #d4af37; margin: 0 0 12px 0; font-size: 18px;">🏪 Shri Jewellery</h3>
-                <p style="margin: 6px 0; font-size: 13px; color: #333;">📍 ${SHOP_LOCATION.address}</p>
-                <p style="margin: 6px 0; font-size: 13px; color: #333;">📞 ${SHOP_LOCATION.phone}</p>
-                <a href="https://www.google.com/maps/dir/?api=1&destination=${SHOP_LOCATION.lat},${SHOP_LOCATION.lng}" 
-                   target="_blank" 
-                   style="display: inline-block; margin-top: 12px; padding: 10px 18px; background: linear-gradient(135deg, #d4af37, #b8860b); color: #0f1424; text-decoration: none; border-radius: 8px; font-weight: bold; font-size: 13px;">
-                    🚗 Get Directions
-                </a>
-            </div>
-        `
-    });
+        shopMarker.addListener("click", () => infoWindow.open(map, shopMarker));
 
-    shopMarker.addListener('click', () => {
-        infoWindow.open(map, shopMarker);
-    });
-
-    // Check operating status
-    checkOperatingStatus();
-}
-
-function checkOperatingStatus() {
-    const now = new Date();
-    const day = now.getDay();
-    const hours = now.getHours();
-    const statusEl = document.getElementById('operating-status');
-    const todayRow = document.querySelector(`.hours-row[data-day="${day}"]`);
-    
-    // Highlight today
-    document.querySelectorAll('.hours-row').forEach(row => row.classList.remove('today'));
-    if (todayRow) todayRow.classList.add('today');
-
-    // Check if open (Mon-Sat: 10AM-8PM)
-    if (day === 0) {
-        statusEl.textContent = 'CLOSED';
-        statusEl.className = 'operating-status closed';
-    } else if (hours >= 10 && hours < 20) {
-        statusEl.textContent = 'OPEN';
-        statusEl.className = 'operating-status open';
-    } else {
-        statusEl.textContent = 'CLOSED';
-        statusEl.className = 'operating-status closed';
-    }
-}
-
-function getUserLocation() {
-    const btn = document.getElementById('btn-find-location');
-    const statusEl = document.getElementById('location-status');
-    const distanceEl = document.getElementById('distance-info');
-
-    if (!navigator.geolocation) {
-        statusEl.textContent = 'Geolocation is not supported by your browser';
-        statusEl.className = 'location-status error';
-        return;
-    }
-
-    btn.disabled = true;
-    btn.textContent = '⏳ Detecting...';
-    statusEl.textContent = 'Finding your location...';
-    statusEl.className = 'location-status detecting';
-
-    navigator.geolocation.getCurrentPosition(
-        (position) => {
-            const userLat = position.coords.latitude;
-            const userLng = position.coords.longitude;
-
-            // Remove previous user marker and line
-            if (userMarker) userMarker.setMap(null);
-            if (directionLine) directionLine.setMap(null);
-
-            // Add user marker
-            userMarker = new google.maps.Marker({
-                position: { lat: userLat, lng: userLng },
-                map: map,
-                icon: {
-                    path: google.maps.SymbolPath.CIRCLE,
-                    scale: 12,
-                    fillColor: '#4285F4',
-                    fillOpacity: 1,
-                    strokeColor: '#ffffff',
-                    strokeWeight: 4,
-                },
-                title: 'Your Location'
+        if (navigator.geolocation) {
+            navigator.geolocation.getCurrentPosition(position => {
+                const userLocation = { lat: position.coords.latitude, lng: position.coords.longitude };
+                userMarker = new google.maps.Marker({
+                    position: userLocation,
+                    map: map,
+                    icon: "http://maps.google.com/mapfiles/ms/icons/blue-dot.png",
+                    title: "Your Location"
+                });
+                const distance = getDistance(userLocation, shopLocation);
+                const badge = document.getElementById('distance-badge');
+                badge.style.display = 'block';
+                badge.innerHTML = '📍 Distance: ' + distance.toFixed(2) + ' km';
             });
-
-            // Draw line between user and shop
-            directionLine = new google.maps.Polyline({
-                path: [
-                    { lat: userLat, lng: userLng },
-                    SHOP_LOCATION
-                ],
-                map: map,
-                strokeColor: '#d4af37',
-                strokeOpacity: 0.9,
-                strokeWeight: 4,
-                geodesic: true
-            });
-
-            // Calculate distance
-            const distance = calculateDistance(userLat, userLng, SHOP_LOCATION.lat, SHOP_LOCATION.lng);
-            
-            statusEl.textContent = '✓ Location found!';
-            statusEl.className = 'location-status found';
-            
-            document.getElementById('distance-value').textContent = distance;
-            distanceEl.classList.add('show');
-
-            // Pan map to show both markers
-            const bounds = new google.maps.LatLngBounds();
-            bounds.extend({ lat: userLat, lng: userLng });
-            bounds.extend(SHOP_LOCATION);
-            map.fitBounds(bounds, 80);
-
-            btn.disabled = false;
-            btn.textContent = '📍 Update Location';
-        },
-        (error) => {
-            btn.disabled = false;
-            btn.textContent = '📍 Find My Location';
-            
-            switch (error.code) {
-                case error.PERMISSION_DENIED:
-                    statusEl.textContent = 'Location access denied';
-                    break;
-                case error.POSITION_UNAVAILABLE:
-                    statusEl.textContent = 'Location unavailable';
-                    break;
-                case error.TIMEOUT:
-                    statusEl.textContent = 'Request timed out';
-                    break;
-                default:
-                    statusEl.textContent = 'Error detecting location';
-            }
-            statusEl.className = 'location-status error';
-        },
-        {
-            enableHighAccuracy: true,
-            timeout: 10000,
-            maximumAge: 0
         }
-    );
-}
-
-// Calculate distance using Haversine formula
-function calculateDistance(lat1, lon1, lat2, lon2) {
-    const R = 6371;
-    const dLat = toRad(lat2 - lat1);
-    const dLon = toRad(lon2 - lon1);
-    const a = Math.sin(dLat/2) * Math.sin(dLat/2) +
-              Math.cos(toRad(lat1)) * Math.cos(toRad(lat2)) *
-              Math.sin(dLon/2) * Math.sin(dLon/2);
-    const c = 2 * Math.atan2(Math.sqrt(a), Math.sqrt(1-a));
-    const d = R * c;
-    
-    if (d < 1) {
-        return Math.round(d * 1000) + ' m';
-    } else {
-        return d.toFixed(1) + ' km';
     }
-}
 
-function toRad(deg) {
-    return deg * (Math.PI / 180);
-}
+    function getDistance(loc1, loc2) {
+        const R = 6371;
+        const dLat = (loc2.lat - loc1.lat) * Math.PI / 180;
+        const dLng = (loc2.lng - loc1.lng) * Math.PI / 180;
+        const a = Math.sin(dLat/2) * Math.sin(dLat/2) + Math.cos(loc1.lat * Math.PI / 180) * Math.cos(loc2.lat * Math.PI / 180) * Math.sin(dLng/2) * Math.sin(dLng/2);
+        return R * 2 * Math.atan2(Math.sqrt(a), Math.sqrt(1-a));
+    }
 
-window.initMap = initMap;
+    function openDirections() {
+        window.open("https://www.google.com/maps/dir/?api=1&destination=12.7716,76.5173", "_blank");
+    }
+
+    window.initMap = initMap;
 </script>
-
-<!-- Google Maps API -->
-<script async defer
-    src="https://maps.googleapis.com/maps/api/js?key=AIzaSyBxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx&callback=initMap">
-</script>
-
-<!-- Fallback if Google Maps fails to load -->
-<script>
-window.addEventListener('load', () => {
-    setTimeout(() => {
-        if (typeof google === 'undefined' || typeof google.maps === 'undefined') {
-            document.getElementById('map').innerHTML = `
-                <div style="display: flex; flex-direction: column; align-items: center; justify-content: center; height: 100%; padding: 40px; text-align: center; background: linear-gradient(135deg, #1a1a2e 0%, #16213e 100%);">
-                    <div style="font-size: 5rem; margin-bottom: 20px;">📍</div>
-                    <h2 style="color: #d4af37; margin-bottom: 15px;">Shri Jewellery</h2>
-                    <p style="color: #888; margin-bottom: 8px;">Chinya Post Office, PP32+J2X</p>
-                    <p style="color: #888; margin-bottom: 8px;">Honakere, Karnataka 571431</p>
-                    <a href="https://www.google.com/maps/dir/?api=1&destination=12.7716,76.5173" 
-                       target="_blank" 
-                       style="margin-top: 15px; padding: 15px 30px; background: linear-gradient(135deg, #d4af37, #b8860b); color: #0f1424; text-decoration: none; border-radius: 12px; font-weight: bold;">
-                        🚗 Open in Google Maps
-                    </a>
-                </div>
-            `;
-        }
-    }, 3000);
-});
-</script>
+<script async src="https://maps.googleapis.com/maps/api/js?key=AIzaSyBxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx&callback=initMap"></script>
 {% endblock %}
