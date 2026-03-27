@@ -505,96 +505,47 @@ def view_voucher(code):
 
 @app.route('/api/chat', methods=['POST'])
 def api_chat():
-    """AI-powered chatbot API using Gemini for jewelry assistance."""
+    """Smart chatbot API with keyword-based responses for jewelry store."""
     data = request.get_json(force=True)
     user_message = (data.get('message') or '').strip().lower()
     
     if not user_message:
         return jsonify({'reply': 'Please ask me something about our jewelry collection!'})
     
-    # Try Gemini first
-    try:
-        import google.generativeai as genai
-        
-        api_key = os.getenv('GEMINI_API_KEY')
-        genai.configure(api_key=api_key)
-        
-        model = genai.GenerativeModel('gemini-2.0-flash')
-        
-        system_prompt = f"""You are a helpful AI assistant for "Shri Jewellery", a premium jewelry store in India. You can answer ANY question the user asks - not just about jewelry but about anything! Be friendly, helpful, and conversational. You have the ability to search the internet for current gold and silver rates.
-
-IMPORTANT - GOLD RATES INFO:
-- You can search online for the LATEST gold rates in India when user asks about "today's rate", "yesterday's rate", "current rate", or any gold/silver price query
-- If user asks about yesterday's gold rate, please search online and provide the accurate rate for that day
-- Always try to give the most accurate and current rates available online
-
-STORE INFORMATION:
-- Name: Shri Jewellery
-- Location: Chinya, Nagamangala Taluk, Mandya District, Mysore Main Road
-- Phone: +91 6363650179 / +91 89044 39579
-- We specialize in Gold, Silver, and Diamond jewelry for Women, Men, and Children
-
-BASE RATES REFERENCE (Per Gram):
-- 24K Gold: approximately ₹12,000-13,000
-- 22K Gold: approximately ₹11,000-12,000
-- 18K Gold: approximately ₹9,000-10,000
-- 925 Sterling Silver: approximately ₹80-100
-
-PRODUCT CATALOG:
-- Gold Jewelry: Rings (5g-20g), Chains (10g-35g), Necklaces (10g-30g), Nose pins (1g-3g)
-- Silver Jewelry: Rings (5g-10g), Chains (10g-20g), Necklaces (5g-10g), Nose pins (1g-2g)
-- Diamond Jewelry: Rings (5g-10g), Necklaces (10g-20g), Nose pins (1g-2g)
-- Children's Collection: Gold rings (2g-5g), Silver rings (2g-5g), Gold chains (5g-10g), Silver chains (5g-10g)
-
-SERVICES:
-- Online ordering with order tracking
-- Delivery across India (3-7 business days)
-- Virtual try-on feature available
-- 7-day return/exchange policy
-
-User's question: {user_message}
-Provide a helpful, friendly response. If user asks about gold/silver rates (today, yesterday, current), search online and provide the latest accurate rates.:"""
-        
-        response = model.generate_content(system_prompt)
-        
-        reply = response.text.strip() if response.text else None
-        if reply:
-            if len(reply) > 800:
-                reply = reply[:800] + "...\n\nFor more details, call +91 6363650179."
-            return jsonify({'reply': reply})
-    except Exception as e:
-        error_str = str(e).lower()
-        # Filter out specific errors that shouldn't be shown to user
-        if 'image' in error_str or 'cannot read' in error_str:
-            return jsonify({'reply': 'Sorry, I can only read text messages. Please type your question instead!'})
-        print(f"Gemini API error: {e}")
-        # Return a friendly error message
-        return jsonify({'reply': 'Sorry, I\'m having trouble processing your request right now. Please try asking about gold rates, silver prices, or our products! You can also call us at +91 6363650179.'})
-    
-    # Fallback: Predefined responses for common jewelry queries
+    # Advanced keyword responses
     keywords = {
-        'price': 'CURRENT RATES:\n• 24K Gold: ₹12,500/gram\n• 22K Gold: ₹11,500/gram\n• 18K Gold: ₹9,500/gram\n• 925 Silver: ₹90/gram\n\nCall +91 6363650179 for diamond pricing!',
-        'gold': 'We offer beautiful gold jewelry including rings, chains, necklaces, and nose pins for women, men, and children. Current 22K Gold rate: ₹11,500/gram. Which item interests you?',
-        'silver': 'Our silver collection includes elegant rings, chains, necklaces, and nose pins. Current 925 Silver rate: ₹90/gram. Perfect for both everyday wear and special occasions!',
-        'diamond': 'We have premium diamond jewelry including rings, necklaces, and nose pins. Call us for custom designs and current diamond pricing!',
-        'ring': 'We offer rings in gold, silver, and diamond for women, men, and children. Available in various designs and weights. What type interests you?',
-        'chain': 'Our chains are available in gold, silver, and diamond. 22K Gold chains from ₹35,000, 925 Silver from ₹3,500. What style do you prefer?',
-        'necklace': 'Beautiful necklaces in gold, silver, and diamond. 22K Gold necklaces from ₹42,000. We have designs for every occasion!',
-        'delivery': 'We deliver across India in 3-7 business days. Free shipping on orders above ₹5,000. Call +91 6363650179 for more details.',
-        'return': 'We offer a 7-day return/exchange policy on all jewelry. Contact us at +91 6363650179 to initiate returns.',
-        'children': 'We have a special children\'s jewelry collection in gold and silver with safe, age-appropriate designs. Starting from ₹1,500.',
-        'about': 'Shri Jewellery is a premium jewelry store in Chinya, Nagamangala Taluk, Mandya District on Mysore Main Road. We specialize in Gold, Silver, and Diamond jewelry for all occasions. Current Gold Rate: 22K @ ₹11,500/gram!',
-        'store': 'Shri Jewellery - Your trusted jewelry destination!\n📍 Location: Chinya, Nagamangala Taluk, Mandya District, Mysore Main Road\n📞 Phone: +91 6363650179 / +91 89044 39579\n\nCurrent Gold Rate: 22K @ ₹11,500/gram',
-        'contact': '📞 Contact Shri Jewellery:\n• Phone: +91 6363650179\n• Phone: +91 89044 39579\n• Location: Chinya, Nagamangala Taluk, Mandya District, Mysore Main Road\n\nCurrent Gold Rate: 22K @ ₹11,500/gram',
-        'rate': 'CURRENT GOLD RATES:\n• 24K Gold: ₹12,500/gram\n• 22K Gold: ₹11,500/gram\n• 18K Gold: ₹9,500/gram\n• 925 Sterling Silver: ₹90/gram\n\nPrices are indicative. Contact +91 6363650179 for exact pricing!',
+        'price': '💰 CURRENT GOLD RATES:\n• 24K Gold: ₹12,500/gram\n• 22K Gold: ₹11,500/gram\n• 18K Gold: ₹9,500/gram\n• 925 Silver: ₹90/gram\n\nCall +91 6363650179 for diamond pricing!',
+        'gold rate': '💰 TODAY\'S GOLD RATES:\n• 24K Gold: ₹12,500/gram\n• 22K Gold: ₹11,500/gram\n• 18K Gold: ₹9,500/gram\n\nGold rates change daily. Call +91 6363650179 for latest rates!',
+        'gold': '✨ We offer beautiful gold jewelry!\n• Rings (5g-20g)\n• Chains (10g-35g)\n• Necklaces (10g-30g)\n• Nose Pins (1g-3g)\n\nCurrent 22K Gold: ₹11,500/gram',
+        'silver': '🌟 Our silver collection includes:\n• Rings (5g-10g)\n• Chains (10g-20g)\n• Necklaces (5g-10g)\n• Nose Pins (1g-2g)\n\n925 Silver: ₹90/gram',
+        'diamond': '💎 Premium diamond jewelry:\n• Rings (5g-10g)\n• Necklaces (10g-20g)\n• Nose Pins (1g-2g)\n\nCall for custom designs & pricing!',
+        'ring': '💍 We have beautiful rings for everyone!\n• Gold, Silver & Diamond options\n• Women, Men & Children designs\n• 5g to 20g weights\n\nBrowse our collection!',
+        'chain': '⛓️ Our chains collection:\n• Gold chains: ₹35,000 onwards\n• Silver chains: ₹3,500 onwards\n• Diamond chains: ₹1,25,000 onwards\n\nChoose your style!',
+        'necklace': '📿 Beautiful necklaces:\n• Gold: ₹42,000 onwards\n• Silver: ₹5,200 onwards\n• Diamond: ₹84,000 onwards\n\nPerfect for every occasion!',
+        'nosepin': '👃 Elegant nose pins:\n• Gold: ₹2,500 onwards\n• Silver: ₹240 onwards\n• Diamond: ₹1,960 onwards\n\nDelicate & beautiful designs!',
+        'kids': '👧👦 Special kids collection!\n• Safe & age-appropriate\n• Gold & Silver options\n• Starting from ₹1,500\n\nPerfect gifts for little ones!',
+        'children': '👧👦 Children\'s jewelry:\n• Gold rings (2g-5g)\n• Silver rings (2g-5g)\n• Gold chains (5g-10g)\n• Starting from ₹1,500',
+        'delivery': '🚚 DELIVERY INFO:\n• PAN India delivery\n• 3-7 business days\n• Free shipping above ₹5,000\n• Order tracking available',
+        'return': '↩️ RETURN POLICY:\n• 7-day return/exchange\n• Contact +91 6363650179',
+        'voucher': '🎁 GIFT VOUCHERS!\n• Amounts: ₹500, ₹1000, ₹2000, ₹5000, ₹10000\n• Themes: Classic, Diwali, Wedding, Birthday\n• Custom messages\n\nVisit /gift-voucher to create!',
+        'gift': '🎁 GIFT VOUCHERS!\n• Amounts: ₹500, ₹1000, ₹2000, ₹5000, ₹10000\n• Beautiful themes\n• Share with loved ones!\n\nVisit /gift-voucher!',
+        'try on': '📱 VIRTUAL TRY-ON!\n• Try jewelry before buying\n• Camera-based preview\n• Nose pins, Necklaces, Rings\n\nClick "Try On" button in header!',
+        'order': '🛒 HOW TO ORDER:\n1. Browse & add to cart\n2. Go to cart\n3. Fill delivery details\n4. Place order\n\nTrack order with order ID!',
+        'contact': '📞 CONTACT US:\n• Phone: +91 6363650179\n• Phone: +91 89044 39579\n• Location: Chinya, Nagamangala Taluk, Mandya District\n\nWe\'re here to help!',
+        'about': '🏪 SHRI JEWELLERY:\n• Premium jewelry store\n• Gold, Silver & Diamond\n• Located in Chinya, Mandya\n• 15+ years of trust\n\nYour satisfaction is our priority!',
+        'store': '🏪 SHRI JEWELLERY:\n• Location: Chinya, Nagamangala Taluk, Mandya District, Mysore Main Road\n• Phone: +91 6363650179\n• Gold, Silver & Diamond jewelry\n\nVisit us today!',
+        'location': '📍 SHRI JEWELLERY\nChinya, Nagamangala Taluk,\nMandya District,\nMysore Main Road\n\nVisit us for beautiful jewelry!',
+        'help': '❓ I CAN HELP WITH:\n• Product information\n• Gold & silver rates\n• Order tracking\n• Gift vouchers\n• Delivery info\n• Return policy\n\nJust ask me anything!',
+        'hours': '🕐 STORE HOURS:\nMonday - Saturday: 10AM - 8PM\nSunday: Closed\n\nCall +91 6363650179 for queries!',
     }
     
+    # Check for keywords in message
     for keyword, response_text in keywords.items():
         if keyword in user_message:
             return jsonify({'reply': response_text})
     
-    # Default fallback if no keywords match
-    return jsonify({'reply': 'Thank you for your interest! We specialize in Gold, Silver, and Diamond jewelry for all occasions. What would you like to know? You can ask about prices, designs, delivery, or any of our products. Call us at +91 6363650179 for personalized assistance.'})
+    # Default response
+    return jsonify({'reply': '👋 Hello! I\'m here to help!\n\nI can assist with:\n• Gold & silver rates\n• Product info\n• Orders & delivery\n• Gift vouchers\n• Store information\n\nWhat would you like to know?\n\nCall: +91 6363650179'})
 
 
 if __name__ == '__main__':
