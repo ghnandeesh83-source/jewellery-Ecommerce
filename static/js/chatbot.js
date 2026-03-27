@@ -133,7 +133,7 @@
   
   // Add welcome message
   setTimeout(() => {
-    addBubble('Hello! Welcome to Shri Jewellery! ✨<br><br>I\'m your AI assistant, powered by advanced technology to help you with:<br>• Product recommendations and pricing<br>• Delivery and order information<br>• Sizing and care instructions<br>• Store details and contact info<br>• Any questions about our jewelry collection<br><br>Ask me anything about our gold, silver, and diamond pieces!', false);
+    addBubble('Hello! Welcome to Shri Jewellery! ✨<br><br>How can I help you today?<br>• Gold & silver rates<br>• Product info<br>• Delivery info<br>• Gift vouchers<br>• Store details<br><br>Ask me anything!', false);
   }, 800);
   
   // Block image paste/drop
