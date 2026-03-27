@@ -563,6 +563,10 @@ Provide a helpful, friendly response. If user asks about gold/silver rates (toda
                 reply = reply[:800] + "...\n\nFor more details, call +91 6363650179."
             return jsonify({'reply': reply})
     except Exception as e:
+        error_str = str(e).lower()
+        # Filter out specific errors that shouldn't be shown to user
+        if 'image' in error_str or 'cannot read' in error_str:
+            return jsonify({'reply': 'Sorry, I can only read text messages. Please type your question instead!'})
         print(f"Gemini API error: {e}")
         # Return a friendly error message
         return jsonify({'reply': 'Sorry, I\'m having trouble processing your request right now. Please try asking about gold rates, silver prices, or our products! You can also call us at +91 6363650179.'})
