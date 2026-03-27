@@ -1,153 +1,186 @@
 {% extends 'layout.html' %}
 
-{% block content %}
+{% block extra_head %}
+<link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css" />
 <style>
-    body { margin: 0; font-family: Arial, sans-serif; }
-    #map { height: 100vh; width: 100%; }
+    body { margin: 0; font-family: 'Inter', Arial, sans-serif; }
+    .location-wrapper { position: relative; height: calc(100vh - 80px); margin: -20px; }
+    #map { height: 100%; width: 100%; }
+    
     .top-bar {
         position: absolute;
         top: 20px;
         left: 50%;
         transform: translateX(-50%);
-        z-index: 10;
+        z-index: 1000;
         background: linear-gradient(135deg, #d4af37, #b8860b);
-        padding: 15px 30px;
+        padding: 12px 25px;
         border-radius: 50px;
         box-shadow: 0 4px 20px rgba(0,0,0,0.3);
     }
-    .top-bar h1 { margin: 0; color: #0f1424; font-size: 1.5rem; }
+    .top-bar h1 { margin: 0; color: #0f1424; font-size: 1.3rem; font-weight: 700; }
+    
     .info-panel {
         position: absolute;
         bottom: 20px;
         left: 20px;
-        z-index: 10;
+        z-index: 1000;
         background: rgba(15, 20, 36, 0.95);
         padding: 20px;
         border-radius: 16px;
         color: white;
-        max-width: 300px;
-        border: 1px solid #d4af37;
-        box-shadow: 0 4px 20px rgba(0,0,0,0.3);
+        max-width: 280px;
+        border: 2px solid #d4af37;
+        box-shadow: 0 8px 30px rgba(0,0,0,0.4);
     }
-    .info-panel h2 { margin: 0 0 10px 0; color: #d4af37; }
-    .info-panel p { margin: 5px 0; font-size: 14px; }
+    .info-panel h2 { margin: 0 0 12px 0; color: #d4af37; font-size: 1.2rem; }
+    .info-panel p { margin: 6px 0; font-size: 0.9rem; color: #ccc; }
+    .info-panel .phone { color: #d4af37; font-weight: 600; }
+    
     .btn-dir {
         position: absolute;
         bottom: 20px;
         right: 20px;
-        z-index: 10;
+        z-index: 1000;
         background: linear-gradient(135deg, #d4af37, #b8860b);
         color: #0f1424;
-        padding: 15px 25px;
+        padding: 14px 24px;
         border-radius: 50px;
         cursor: pointer;
-        font-weight: bold;
+        font-weight: 700;
         border: none;
         box-shadow: 0 4px 20px rgba(212,175,55,0.4);
+        font-size: 1rem;
+        transition: transform 0.3s;
     }
     .btn-dir:hover { transform: scale(1.05); }
+    
     .distance-badge {
         position: absolute;
         top: 80px;
         left: 50%;
         transform: translateX(-50%);
-        z-index: 10;
+        z-index: 1000;
         background: rgba(15, 20, 36, 0.95);
         padding: 10px 20px;
         border-radius: 25px;
         color: #d4af37;
-        font-weight: bold;
+        font-weight: 700;
         display: none;
-        border: 1px solid #d4af37;
+        border: 2px solid #d4af37;
+        animation: fadeIn 0.5s ease;
+    }
+    .distance-badge.show { display: block; }
+    
+    @keyframes fadeIn { from { opacity: 0; transform: translateX(-50%) translateY(-10px); } to { opacity: 1; transform: translateX(-50%) translateY(0); } }
+    
+    .leaflet-popup-content-wrapper { background: #1a1a2e; color: #fff; border-radius: 12px; }
+    .leaflet-popup-tip { background: #1a1a2e; }
+    .leaflet-popup-content { margin: 15px; }
+    
+    @media (max-width: 600px) {
+        .info-panel { max-width: 200px; padding: 15px; }
+        .info-panel p { font-size: 0.8rem; }
+        .btn-dir { padding: 12px 18px; font-size: 0.9rem; }
     }
 </style>
+{% endblock %}
 
-<div id="map"></div>
-
-<div class="top-bar">
-    <h1>💎 Shri Jewellery</h1>
+{% block content %}
+<div class="location-wrapper">
+    <div id="map"></div>
+    
+    <div class="top-bar">
+        <h1>💎 Shri Jewellery</h1>
+    </div>
+    
+    <div class="distance-badge" id="distance-badge"></div>
+    
+    <div class="info-panel">
+        <h2>🏪 Shri Jewellery</h2>
+        <p>📍 Chinya, Honakere</p>
+        <p>📍 Nagamangala, Karnataka</p>
+        <p>📍 571431</p>
+        <p class="phone">📞 +91 6363650179</p>
+        <p class="phone">📞 +91 89044 39579</p>
+    </div>
+    
+    <button class="btn-dir" onclick="openDirections()">🚗 Get Directions</button>
 </div>
 
-<div class="distance-badge" id="distance-badge"></div>
-
-<div class="info-panel">
-    <h2>🏪 Shri Jewellery</h2>
-    <p>📍 Chinya, Honakere</p>
-    <p>📍 Nagamangala, Karnataka</p>
-    <p>📍 571431</p>
-    <p>📞 +91 6363650179</p>
-    <p>📞 +91 89044 39579</p>
-</div>
-
-<button class="btn-dir" onclick="openDirections()">🚗 Get Directions</button>
-
+<script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
 <script>
-    let map, userMarker, shopMarker;
-    const shopLocation = { lat: 12.7716, lng: 76.5173 };
-
-    function initMap() {
-        map = new google.maps.Map(document.getElementById("map"), {
-            center: shopLocation,
-            zoom: 16,
-            styles: [
-                { elementType: "geometry", stylers: [{ color: "#212121" }] },
-                { elementType: "labels.text.stroke", stylers: [{ color: "#212121" }] },
-                { elementType: "labels.text.fill", stylers: [{ color: "#757575" }] },
-                { featureType: "road", elementType: "geometry", stylers: [{ color: "#38414e" }] },
-                { featureType: "water", elementType: "geometry", stylers: [{ color: "#17263c" }] }
-            ]
-        });
-
-        shopMarker = new google.maps.Marker({
-            position: shopLocation,
-            map: map,
-            icon: {
-                path: google.maps.SymbolPath.CIRCLE,
-                scale: 20,
-                fillColor: '#d4af37',
-                fillOpacity: 1,
-                strokeColor: '#fff',
-                strokeWeight: 3
-            },
-            title: "Shri Jewellery"
-        });
-
-        const infoWindow = new google.maps.InfoWindow({
-            content: '<div style="padding:10px;"><h3 style="color:#d4af37;">🏪 Shri Jewellery</h3><p>📍 Chinya, Honakere, Nagamangala</p><p>📞 +91 6363650179</p></div>'
-        });
-
-        shopMarker.addListener("click", () => infoWindow.open(map, shopMarker));
-
-        if (navigator.geolocation) {
-            navigator.geolocation.getCurrentPosition(position => {
-                const userLocation = { lat: position.coords.latitude, lng: position.coords.longitude };
-                userMarker = new google.maps.Marker({
-                    position: userLocation,
-                    map: map,
-                    icon: "http://maps.google.com/mapfiles/ms/icons/blue-dot.png",
-                    title: "Your Location"
-                });
-                const distance = getDistance(userLocation, shopLocation);
-                const badge = document.getElementById('distance-badge');
-                badge.style.display = 'block';
-                badge.innerHTML = '📍 Distance: ' + distance.toFixed(2) + ' km';
+    // Shop Location - Chinya, Honakere, Nagamangala
+    const shopLocation = [12.7716, 76.5173];
+    
+    // Initialize map with dark theme
+    const map = L.map('map').setView(shopLocation, 15);
+    
+    // Dark map tiles (free, no API key needed)
+    L.tileLayer('https://{s}.basemaps.cartocdn.com/dark_all/{z}/{x}/{y}{r}.png', {
+        attribution: '&copy; OpenStreetMap &copy; CartoDB',
+        maxZoom: 19
+    }).addTo(map);
+    
+    // Custom gold marker
+    const goldIcon = L.divIcon({
+        html: '<div style="background:linear-gradient(135deg,#d4af37,#b8860b);width:30px;height:30px;border-radius:50%;border:3px solid white;box-shadow:0 3px 10px rgba(0,0,0,0.3);"></div>',
+        iconSize: [30, 30],
+        iconAnchor: [15, 15]
+    });
+    
+    const shopMarker = L.marker(shopLocation, {icon: goldIcon}).addTo(map);
+    shopMarker.bindPopup('<div style="text-align:center;"><h3 style="color:#d4af37;margin:0 0 8px 0;">💎 Shri Jewellery</h3><p style="margin:3px 0;">📍 Chinya, Honakere</p><p style="margin:3px 0;">📍 Nagamangala, Karnataka</p><p style="margin:3px 0;color:#d4af37;">📞 +91 6363650179</p></div>');
+    
+    // Get user location
+    if (navigator.geolocation) {
+        navigator.geolocation.getCurrentPosition(position => {
+            const userLoc = [position.coords.latitude, position.coords.longitude];
+            
+            // Blue marker for user
+            const userIcon = L.divIcon({
+                html: '<div style="background:#4285F4;width:24px;height:24px;border-radius:50%;border:3px solid white;box-shadow:0 3px 10px rgba(0,0,0,0.3);"></div>',
+                iconSize: [24, 24],
+                iconAnchor: [12, 12]
             });
-        }
+            
+            const userMarker = L.marker(userLoc, {icon: userIcon}).addTo(map);
+            userMarker.bindPopup('Your Location');
+            
+            // Draw line between user and shop
+            const line = L.polyline([userLoc, shopLocation], {
+                color: '#d4af37',
+                weight: 3,
+                opacity: 0.8,
+                dashArray: '10, 10'
+            }).addTo(map);
+            
+            // Calculate distance
+            const distance = getDistance(userLoc[0], userLoc[1], shopLocation[0], shopLocation[1]);
+            const badge = document.getElementById('distance-badge');
+            badge.textContent = '📍 Distance: ' + distance.toFixed(2) + ' km';
+            badge.classList.add('show');
+            
+            // Fit bounds to show both
+            map.fitBounds(line.getBounds(), {padding: [50, 50]});
+        }, (err) => {
+            console.log('Location error:', err.message);
+        });
     }
-
-    function getDistance(loc1, loc2) {
+    
+    // Haversine formula for distance
+    function getDistance(lat1, lon1, lat2, lon2) {
         const R = 6371;
-        const dLat = (loc2.lat - loc1.lat) * Math.PI / 180;
-        const dLng = (loc2.lng - loc1.lng) * Math.PI / 180;
-        const a = Math.sin(dLat/2) * Math.sin(dLat/2) + Math.cos(loc1.lat * Math.PI / 180) * Math.cos(loc2.lat * Math.PI / 180) * Math.sin(dLng/2) * Math.sin(dLng/2);
+        const dLat = (lat2 - lat1) * Math.PI / 180;
+        const dLon = (lon2 - lon1) * Math.PI / 180;
+        const a = Math.sin(dLat/2) * Math.sin(dLat/2) +
+                   Math.cos(lat1 * Math.PI / 180) * Math.cos(lat2 * Math.PI / 180) *
+                   Math.sin(dLon/2) * Math.sin(dLon/2);
         return R * 2 * Math.atan2(Math.sqrt(a), Math.sqrt(1-a));
     }
-
+    
     function openDirections() {
-        window.open("https://www.google.com/maps/dir/?api=1&destination=12.7716,76.5173", "_blank");
+        window.open('https://www.google.com/maps/dir/?api=1&destination=' + shopLocation[0] + ',' + shopLocation[1], '_blank');
     }
-
-    window.initMap = initMap;
 </script>
-<script async src="https://maps.googleapis.com/maps/api/js?key=AIzaSyBxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx&callback=initMap"></script>
 {% endblock %}
