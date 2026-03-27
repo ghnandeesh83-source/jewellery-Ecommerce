@@ -11,26 +11,42 @@
 .location-header {
     text-align: center;
     margin-bottom: 30px;
+    padding: 30px 20px;
+    background: linear-gradient(135deg, rgba(212, 175, 55, 0.1) 0%, rgba(184, 134, 11, 0.05) 100%);
+    border-radius: 16px;
+    border: 1px solid rgba(212, 175, 55, 0.2);
 }
 
 .location-header h1 {
     color: var(--accent);
-    font-size: 2.5rem;
-    margin-bottom: 10px;
+    font-size: 2.2rem;
+    margin-bottom: 8px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 15px;
+}
+
+.location-header h1::before,
+.location-header h1::after {
+    content: '✨';
+    font-size: 1.5rem;
 }
 
 .location-header p {
     color: var(--muted);
     font-size: 1.1rem;
+    margin: 0;
 }
 
 .location-container {
     display: grid;
-    grid-template-columns: 1fr 350px;
-    gap: 30px;
+    grid-template-columns: 1fr 340px;
+    gap: 25px;
+    align-items: start;
 }
 
-@media (max-width: 900px) {
+@media (max-width: 968px) {
     .location-container {
         grid-template-columns: 1fr;
     }
@@ -38,19 +54,25 @@
 
 .map-section {
     background: var(--card);
-    border-radius: 16px;
+    border-radius: 20px;
     overflow: hidden;
-    border: 1px solid var(--accent);
+    box-shadow: 0 8px 32px rgba(0, 0, 0, 0.3);
+    border: 1px solid rgba(212, 175, 55, 0.3);
 }
 
 #map {
     width: 100%;
-    height: 500px;
+    height: 480px;
+    border-radius: 20px;
 }
 
 @media (max-width: 600px) {
     #map {
-        height: 350px;
+        height: 320px;
+    }
+    
+    .location-header h1 {
+        font-size: 1.6rem;
     }
 }
 
@@ -62,35 +84,59 @@
 
 .shop-card {
     background: var(--card);
-    border-radius: 16px;
+    border-radius: 20px;
     padding: 25px;
-    border: 1px solid var(--accent);
+    box-shadow: 0 8px 32px rgba(0, 0, 0, 0.2);
+    border: 1px solid rgba(212, 175, 55, 0.3);
+    position: relative;
+    overflow: hidden;
+}
+
+.shop-card::before {
+    content: '';
+    position: absolute;
+    top: 0;
+    left: 0;
+    right: 0;
+    height: 4px;
+    background: linear-gradient(90deg, #d4af37, #b8860b, #d4af37);
 }
 
 .shop-card h2 {
     color: var(--accent);
-    margin-bottom: 15px;
-    font-size: 1.5rem;
+    margin-bottom: 20px;
+    font-size: 1.4rem;
+    display: flex;
+    align-items: center;
+    gap: 10px;
 }
 
 .shop-details {
     display: flex;
     flex-direction: column;
     gap: 12px;
+    margin-bottom: 20px;
 }
 
 .detail-item {
     display: flex;
     align-items: flex-start;
     gap: 12px;
-    padding: 10px;
-    background: rgba(255,255,255,0.03);
-    border-radius: 8px;
+    padding: 12px 15px;
+    background: rgba(255, 255, 255, 0.03);
+    border-radius: 12px;
+    border: 1px solid rgba(255, 255, 255, 0.05);
+    transition: all 0.3s;
+}
+
+.detail-item:hover {
+    background: rgba(212, 175, 55, 0.08);
+    border-color: rgba(212, 175, 55, 0.2);
 }
 
 .detail-icon {
-    font-size: 1.5rem;
-    min-width: 30px;
+    font-size: 1.3rem;
+    min-width: 28px;
     text-align: center;
 }
 
@@ -99,156 +145,189 @@
 }
 
 .detail-label {
-    font-size: 0.8rem;
+    font-size: 0.75rem;
     color: var(--muted);
-    margin-bottom: 2px;
+    margin-bottom: 3px;
+    text-transform: uppercase;
+    letter-spacing: 0.5px;
 }
 
 .detail-value {
     font-weight: 500;
     color: var(--text);
+    font-size: 0.95rem;
 }
 
 .action-buttons {
     display: flex;
     flex-direction: column;
-    gap: 10px;
-    margin-top: 15px;
+    gap: 12px;
 }
 
 .btn-direction {
     display: flex;
     align-items: center;
     justify-content: center;
-    gap: 10px;
-    padding: 14px 20px;
+    gap: 12px;
+    padding: 16px 24px;
     background: linear-gradient(135deg, #d4af37 0%, #b8860b 100%);
     color: #0f1424;
     border: none;
-    border-radius: 10px;
+    border-radius: 14px;
     font-size: 1rem;
-    font-weight: 600;
+    font-weight: 700;
     cursor: pointer;
     text-decoration: none;
     transition: all 0.3s;
+    box-shadow: 0 4px 15px rgba(212, 175, 55, 0.3);
 }
 
 .btn-direction:hover {
-    transform: translateY(-2px);
-    box-shadow: 0 4px 15px rgba(212, 175, 55, 0.4);
+    transform: translateY(-3px);
+    box-shadow: 0 8px 25px rgba(212, 175, 55, 0.5);
 }
 
-.btn-secondary {
+.btn-call {
     display: flex;
     align-items: center;
     justify-content: center;
-    gap: 10px;
-    padding: 12px 20px;
+    gap: 12px;
+    padding: 14px 20px;
     background: transparent;
     color: var(--accent);
     border: 2px solid var(--accent);
-    border-radius: 10px;
+    border-radius: 14px;
     font-size: 1rem;
     font-weight: 600;
     cursor: pointer;
     transition: all 0.3s;
+    text-decoration: none;
 }
 
-.btn-secondary:hover {
+.btn-call:hover {
     background: var(--accent);
     color: var(--bg);
+    transform: translateY(-2px);
 }
 
 .user-location-card {
     background: var(--card);
-    border-radius: 16px;
-    padding: 20px;
-    border: 1px solid var(--accent);
+    border-radius: 20px;
+    padding: 22px;
+    box-shadow: 0 8px 32px rgba(0, 0, 0, 0.2);
+    border: 1px solid rgba(212, 175, 55, 0.3);
 }
 
 .user-location-card h3 {
     color: var(--accent);
     margin-bottom: 15px;
     font-size: 1.1rem;
+    display: flex;
+    align-items: center;
+    gap: 8px;
 }
 
 .location-status {
-    padding: 12px;
-    border-radius: 8px;
+    padding: 14px;
+    border-radius: 12px;
     text-align: center;
     margin-bottom: 15px;
+    font-size: 0.9rem;
 }
 
 .location-status.detecting {
     background: rgba(212, 175, 55, 0.1);
     color: var(--accent);
+    border: 1px dashed rgba(212, 175, 55, 0.3);
 }
 
 .location-status.found {
-    background: rgba(76, 175, 80, 0.1);
+    background: rgba(76, 175, 80, 0.15);
     color: #4caf50;
+    border: 1px solid rgba(76, 175, 80, 0.3);
 }
 
 .location-status.error {
     background: rgba(244, 67, 54, 0.1);
     color: #f44336;
+    border: 1px solid rgba(244, 67, 54, 0.3);
 }
 
 .distance-info {
     display: none;
     text-align: center;
-    padding: 15px;
-    background: rgba(212, 175, 55, 0.1);
-    border-radius: 8px;
-    margin-top: 10px;
+    padding: 18px;
+    background: linear-gradient(135deg, rgba(212, 175, 55, 0.15) 0%, rgba(184, 134, 11, 0.1) 100%);
+    border-radius: 14px;
+    margin-top: 12px;
+    border: 1px solid rgba(212, 175, 55, 0.2);
 }
 
 .distance-info.show {
     display: block;
+    animation: fadeIn 0.4s ease;
+}
+
+@keyframes fadeIn {
+    from { opacity: 0; transform: translateY(-10px); }
+    to { opacity: 1; transform: translateY(0); }
 }
 
 .distance-value {
-    font-size: 2rem;
-    font-weight: bold;
+    font-size: 2.2rem;
+    font-weight: 800;
     color: var(--accent);
+    margin-bottom: 5px;
 }
 
 .distance-label {
     color: var(--muted);
-    font-size: 0.9rem;
+    font-size: 0.85rem;
 }
 
 .btn-get-location {
     width: 100%;
-    padding: 12px;
-    background: var(--accent);
-    color: var(--bg);
+    padding: 14px;
+    background: linear-gradient(135deg, #d4af37 0%, #b8860b 100%);
+    color: #0f1424;
     border: none;
-    border-radius: 8px;
-    font-weight: 600;
+    border-radius: 12px;
+    font-weight: 700;
+    font-size: 0.95rem;
     cursor: pointer;
     transition: all 0.3s;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 8px;
 }
 
 .btn-get-location:hover {
-    opacity: 0.9;
+    transform: translateY(-2px);
+    box-shadow: 0 6px 20px rgba(212, 175, 55, 0.4);
 }
 
 .btn-get-location:disabled {
-    opacity: 0.5;
+    opacity: 0.6;
     cursor: not-allowed;
+    transform: none;
 }
 
 .shop-hours {
     background: var(--card);
-    border-radius: 16px;
-    padding: 20px;
-    border: 1px solid var(--accent);
+    border-radius: 20px;
+    padding: 22px;
+    box-shadow: 0 8px 32px rgba(0, 0, 0, 0.2);
+    border: 1px solid rgba(212, 175, 55, 0.3);
 }
 
 .shop-hours h3 {
     color: var(--accent);
-    margin-bottom: 15px;
+    margin-bottom: 18px;
+    font-size: 1.1rem;
+    display: flex;
+    align-items: center;
+    gap: 10px;
 }
 
 .hours-table {
@@ -258,31 +337,55 @@
 .hours-row {
     display: flex;
     justify-content: space-between;
-    padding: 8px 0;
-    border-bottom: 1px solid rgba(255,255,255,0.1);
+    align-items: center;
+    padding: 10px 12px;
+    border-radius: 8px;
+    margin-bottom: 4px;
+    transition: all 0.3s;
+}
+
+.hours-row:hover {
+    background: rgba(255, 255, 255, 0.03);
 }
 
 .hours-row:last-child {
-    border-bottom: none;
+    margin-bottom: 0;
+}
+
+.hours-row .day {
+    color: var(--text);
+    font-weight: 500;
+}
+
+.hours-row .time {
+    color: var(--muted);
+    font-size: 0.9rem;
 }
 
 .hours-row.today {
+    background: rgba(212, 175, 55, 0.15);
+    border: 1px solid rgba(212, 175, 55, 0.2);
+}
+
+.hours-row.today .day,
+.hours-row.today .time {
     color: var(--accent);
-    font-weight: 600;
+    font-weight: 700;
 }
 
 .operating-status {
     display: inline-block;
-    padding: 4px 12px;
+    padding: 5px 14px;
     border-radius: 20px;
-    font-size: 0.85rem;
-    font-weight: bold;
-    margin-left: 10px;
+    font-size: 0.8rem;
+    font-weight: 700;
+    margin-left: auto;
 }
 
 .operating-status.open {
     background: rgba(76, 175, 80, 0.2);
     color: #4caf50;
+    animation: pulse 2s infinite;
 }
 
 .operating-status.closed {
@@ -290,26 +393,9 @@
     color: #f44336;
 }
 
-/* Custom Map Marker */
-.custom-marker {
-    background: linear-gradient(135deg, #d4af37 0%, #b8860b 100%);
-    color: #0f1424;
-    padding: 10px 15px;
-    border-radius: 8px;
-    font-weight: bold;
-    box-shadow: 0 4px 15px rgba(0,0,0,0.3);
-    white-space: nowrap;
-}
-
-.custom-marker::after {
-    content: '';
-    position: absolute;
-    bottom: -8px;
-    left: 50%;
-    transform: translateX(-50%);
-    border-left: 8px solid transparent;
-    border-right: 8px solid transparent;
-    border-top: 8px solid #b8860b;
+@keyframes pulse {
+    0%, 100% { opacity: 1; }
+    50% { opacity: 0.7; }
 }
 </style>
 {% endblock %}
@@ -317,7 +403,7 @@
 {% block content %}
 <div class="location-page">
     <div class="location-header">
-        <h1>📍 Visit Our Store</h1>
+        <h1>Visit Our Store</h1>
         <p>Experience our beautiful jewelry collection in person</p>
     </div>
 
@@ -334,7 +420,7 @@
                         <span class="detail-icon">📍</span>
                         <div class="detail-text">
                             <div class="detail-label">Address</div>
-                            <div class="detail-value">Chinya, Nagamangala Taluk, Mandya District, Mysore Main Road, Karnataka, India</div>
+                            <div class="detail-value">Chinya Post Office, PP32+J2X, Honakere, Karnataka 571431</div>
                         </div>
                     </div>
                     <div class="detail-item">
@@ -353,10 +439,10 @@
                     </div>
                 </div>
                 <div class="action-buttons">
-                    <a href="https://www.google.com/maps/dir/?api=1&destination=12.7721,76.5121" target="_blank" class="btn-direction">
+                    <a href="https://www.google.com/maps/dir/?api=1&destination=12.7716,76.5173" target="_blank" class="btn-direction">
                         🚗 Get Directions
                     </a>
-                    <a href="tel:+916363650179" class="btn-secondary">
+                    <a href="tel:+916363650179" class="btn-call">
                         📞 Call Now
                     </a>
                 </div>
@@ -377,15 +463,18 @@
             </div>
 
             <div class="shop-hours">
-                <h3>🕐 Store Hours <span id="operating-status" class="operating-status"></span></h3>
+                <h3>
+                    🕐 Store Hours 
+                    <span id="operating-status" class="operating-status"></span>
+                </h3>
                 <div class="hours-table">
-                    <div class="hours-row" data-day="0"><span>Sunday</span><span>Closed</span></div>
-                    <div class="hours-row" data-day="1"><span>Monday</span><span>10:00 AM - 8:00 PM</span></div>
-                    <div class="hours-row" data-day="2"><span>Tuesday</span><span>10:00 AM - 8:00 PM</span></div>
-                    <div class="hours-row" data-day="3"><span>Wednesday</span><span>10:00 AM - 8:00 PM</span></div>
-                    <div class="hours-row" data-day="4"><span>Thursday</span><span>10:00 AM - 8:00 PM</span></div>
-                    <div class="hours-row" data-day="5"><span>Friday</span><span>10:00 AM - 8:00 PM</span></div>
-                    <div class="hours-row" data-day="6"><span>Saturday</span><span>10:00 AM - 8:00 PM</span></div>
+                    <div class="hours-row" data-day="0"><span class="day">Sunday</span><span class="time">Closed</span></div>
+                    <div class="hours-row" data-day="1"><span class="day">Monday</span><span class="time">10:00 AM - 8:00 PM</span></div>
+                    <div class="hours-row" data-day="2"><span class="day">Tuesday</span><span class="time">10:00 AM - 8:00 PM</span></div>
+                    <div class="hours-row" data-day="3"><span class="day">Wednesday</span><span class="time">10:00 AM - 8:00 PM</span></div>
+                    <div class="hours-row" data-day="4"><span class="day">Thursday</span><span class="time">10:00 AM - 8:00 PM</span></div>
+                    <div class="hours-row" data-day="5"><span class="day">Friday</span><span class="time">10:00 AM - 8:00 PM</span></div>
+                    <div class="hours-row" data-day="6"><span class="day">Saturday</span><span class="time">10:00 AM - 8:00 PM</span></div>
                 </div>
             </div>
         </div>
@@ -395,43 +484,50 @@
 
 {% block scripts %}
 <script>
-// Shop location coordinates (Chinya, Nagamangala Taluk, Mandya District)
+// Shop location coordinates - Chinya Post Office, Honakere, Karnataka
 const SHOP_LOCATION = {
-    lat: 12.7721,
-    lng: 76.5121,
+    lat: 12.7716,
+    lng: 76.5173,
     name: 'Shri Jewellery',
-    address: 'Chinya, Nagamangala Taluk, Mandya District, Mysore Main Road',
+    address: 'Chinya Post Office, PP32+J2X, Honakere, Karnataka 571431',
     phone: '+91 6363650179'
 };
 
 let map;
 let userMarker;
 let shopMarker;
+let directionLine;
 
 function initMap() {
-    // Create map centered on shop location
+    // Create map centered on shop location with dark theme styling
     map = new google.maps.Map(document.getElementById('map'), {
-        zoom: 15,
+        zoom: 16,
         center: SHOP_LOCATION,
         mapTypeControl: false,
         streetViewControl: false,
         fullscreenControl: true,
+        styles: [
+            { elementType: "geometry", stylers: [{ color: "#1a1a2e" }] },
+            { elementType: "labels.text.stroke", stylers: [{ color: "#1a1a2e" }] },
+            { elementType: "labels.text.fill", stylers: [{ color: "#746855" }] },
+            { featureType: "road", elementType: "geometry", stylers: [{ color: "#2d2d44" }] },
+            { featureType: "road", elementType: "geometry.stroke", stylers: [{ color: "#1a1a2e" }] },
+            { featureType: "water", elementType: "geometry", stylers: [{ color: "#0f0f23" }] }
+        ]
     });
 
-    // Custom shop marker
-    const markerIcon = {
-        path: google.maps.SymbolPath.CIRCLE,
-        scale: 15,
-        fillColor: '#d4af37',
-        fillOpacity: 1,
-        strokeColor: '#ffffff',
-        strokeWeight: 3,
-    };
-
+    // Custom shop marker with golden color
     shopMarker = new google.maps.Marker({
         position: SHOP_LOCATION,
         map: map,
-        icon: markerIcon,
+        icon: {
+            path: google.maps.SymbolPath.CIRCLE,
+            scale: 18,
+            fillColor: '#d4af37',
+            fillOpacity: 1,
+            strokeColor: '#ffffff',
+            strokeWeight: 4,
+        },
         title: SHOP_LOCATION.name,
         animation: google.maps.Animation.DROP
     });
@@ -439,13 +535,13 @@ function initMap() {
     // Info window for shop marker
     const infoWindow = new google.maps.InfoWindow({
         content: `
-            <div style="padding: 15px; min-width: 200px;">
-                <h3 style="color: #d4af37; margin: 0 0 10px 0;">🏪 Shri Jewellery</h3>
-                <p style="margin: 5px 0; font-size: 14px;">📍 ${SHOP_LOCATION.address}</p>
-                <p style="margin: 5px 0; font-size: 14px;">📞 ${SHOP_LOCATION.phone}</p>
+            <div style="padding: 18px; min-width: 220px; font-family: 'Inter', sans-serif;">
+                <h3 style="color: #d4af37; margin: 0 0 12px 0; font-size: 18px;">🏪 Shri Jewellery</h3>
+                <p style="margin: 6px 0; font-size: 13px; color: #333;">📍 ${SHOP_LOCATION.address}</p>
+                <p style="margin: 6px 0; font-size: 13px; color: #333;">📞 ${SHOP_LOCATION.phone}</p>
                 <a href="https://www.google.com/maps/dir/?api=1&destination=${SHOP_LOCATION.lat},${SHOP_LOCATION.lng}" 
                    target="_blank" 
-                   style="display: inline-block; margin-top: 10px; padding: 8px 15px; background: #d4af37; color: #0f1424; text-decoration: none; border-radius: 5px; font-weight: bold;">
+                   style="display: inline-block; margin-top: 12px; padding: 10px 18px; background: linear-gradient(135deg, #d4af37, #b8860b); color: #0f1424; text-decoration: none; border-radius: 8px; font-weight: bold; font-size: 13px;">
                     🚗 Get Directions
                 </a>
             </div>
@@ -476,7 +572,7 @@ function checkOperatingStatus() {
         statusEl.textContent = 'CLOSED';
         statusEl.className = 'operating-status closed';
     } else if (hours >= 10 && hours < 20) {
-        statusEl.textContent = 'OPEN NOW';
+        statusEl.textContent = 'OPEN';
         statusEl.className = 'operating-status open';
     } else {
         statusEl.textContent = 'CLOSED';
@@ -496,7 +592,7 @@ function getUserLocation() {
     }
 
     btn.disabled = true;
-    btn.textContent = '📍 Detecting...';
+    btn.textContent = '⏳ Detecting...';
     statusEl.textContent = 'Finding your location...';
     statusEl.className = 'location-status detecting';
 
@@ -505,42 +601,42 @@ function getUserLocation() {
             const userLat = position.coords.latitude;
             const userLng = position.coords.longitude;
 
-            // Add user marker
-            if (userMarker) {
-                userMarker.setMap(null);
-            }
+            // Remove previous user marker and line
+            if (userMarker) userMarker.setMap(null);
+            if (directionLine) directionLine.setMap(null);
 
+            // Add user marker
             userMarker = new google.maps.Marker({
                 position: { lat: userLat, lng: userLng },
                 map: map,
                 icon: {
                     path: google.maps.SymbolPath.CIRCLE,
-                    scale: 10,
+                    scale: 12,
                     fillColor: '#4285F4',
                     fillOpacity: 1,
                     strokeColor: '#ffffff',
-                    strokeWeight: 3,
+                    strokeWeight: 4,
                 },
                 title: 'Your Location'
             });
 
             // Draw line between user and shop
-            new google.maps.Polyline({
+            directionLine = new google.maps.Polyline({
                 path: [
                     { lat: userLat, lng: userLng },
                     SHOP_LOCATION
                 ],
                 map: map,
                 strokeColor: '#d4af37',
-                strokeOpacity: 0.8,
-                strokeWeight: 3,
+                strokeOpacity: 0.9,
+                strokeWeight: 4,
                 geodesic: true
             });
 
             // Calculate distance
             const distance = calculateDistance(userLat, userLng, SHOP_LOCATION.lat, SHOP_LOCATION.lng);
             
-            statusEl.textContent = '📍 Location found!';
+            statusEl.textContent = '✓ Location found!';
             statusEl.className = 'location-status found';
             
             document.getElementById('distance-value').textContent = distance;
@@ -550,7 +646,7 @@ function getUserLocation() {
             const bounds = new google.maps.LatLngBounds();
             bounds.extend({ lat: userLat, lng: userLng });
             bounds.extend(SHOP_LOCATION);
-            map.fitBounds(bounds, 50);
+            map.fitBounds(bounds, 80);
 
             btn.disabled = false;
             btn.textContent = '📍 Update Location';
@@ -561,16 +657,16 @@ function getUserLocation() {
             
             switch (error.code) {
                 case error.PERMISSION_DENIED:
-                    statusEl.textContent = 'Location access denied. Please enable location in browser settings.';
+                    statusEl.textContent = 'Location access denied';
                     break;
                 case error.POSITION_UNAVAILABLE:
-                    statusEl.textContent = 'Location information unavailable.';
+                    statusEl.textContent = 'Location unavailable';
                     break;
                 case error.TIMEOUT:
-                    statusEl.textContent = 'Location request timed out.';
+                    statusEl.textContent = 'Request timed out';
                     break;
                 default:
-                    statusEl.textContent = 'An error occurred while detecting location.';
+                    statusEl.textContent = 'Error detecting location';
             }
             statusEl.className = 'location-status error';
         },
@@ -582,9 +678,9 @@ function getUserLocation() {
     );
 }
 
-// Calculate distance between two points using Haversine formula
+// Calculate distance using Haversine formula
 function calculateDistance(lat1, lon1, lat2, lon2) {
-    const R = 6371; // Radius of the Earth in km
+    const R = 6371;
     const dLat = toRad(lat2 - lat1);
     const dLon = toRad(lon2 - lon1);
     const a = Math.sin(dLat/2) * Math.sin(dLat/2) +
@@ -604,11 +700,10 @@ function toRad(deg) {
     return deg * (Math.PI / 180);
 }
 
-// Initialize map when script loads
 window.initMap = initMap;
 </script>
 
-<!-- Google Maps API - Replace YOUR_API_KEY with your actual Google Maps API key -->
+<!-- Google Maps API -->
 <script async defer
     src="https://maps.googleapis.com/maps/api/js?key=AIzaSyBxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx&callback=initMap">
 </script>
@@ -620,13 +715,13 @@ window.addEventListener('load', () => {
         if (typeof google === 'undefined' || typeof google.maps === 'undefined') {
             document.getElementById('map').innerHTML = `
                 <div style="display: flex; flex-direction: column; align-items: center; justify-content: center; height: 100%; padding: 40px; text-align: center; background: linear-gradient(135deg, #1a1a2e 0%, #16213e 100%);">
-                    <div style="font-size: 4rem; margin-bottom: 20px;">📍</div>
+                    <div style="font-size: 5rem; margin-bottom: 20px;">📍</div>
                     <h2 style="color: #d4af37; margin-bottom: 15px;">Shri Jewellery</h2>
-                    <p style="color: #888; margin-bottom: 10px;">Chinya, Nagamangala Taluk, Mandya District</p>
-                    <p style="color: #888; margin-bottom: 20px;">Mysore Main Road, Karnataka, India</p>
-                    <a href="https://www.google.com/maps/dir/?api=1&destination=12.7721,76.5121" 
+                    <p style="color: #888; margin-bottom: 8px;">Chinya Post Office, PP32+J2X</p>
+                    <p style="color: #888; margin-bottom: 8px;">Honakere, Karnataka 571431</p>
+                    <a href="https://www.google.com/maps/dir/?api=1&destination=12.7716,76.5173" 
                        target="_blank" 
-                       style="padding: 15px 30px; background: #d4af37; color: #0f1424; text-decoration: none; border-radius: 10px; font-weight: bold;">
+                       style="margin-top: 15px; padding: 15px 30px; background: linear-gradient(135deg, #d4af37, #b8860b); color: #0f1424; text-decoration: none; border-radius: 12px; font-weight: bold;">
                         🚗 Open in Google Maps
                     </a>
                 </div>
