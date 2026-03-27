@@ -1,0 +1,638 @@
+{% extends 'layout.html' %}
+
+{% block extra_head %}
+<style>
+.location-page {
+    max-width: 1200px;
+    margin: 0 auto;
+    padding: 20px;
+}
+
+.location-header {
+    text-align: center;
+    margin-bottom: 30px;
+}
+
+.location-header h1 {
+    color: var(--accent);
+    font-size: 2.5rem;
+    margin-bottom: 10px;
+}
+
+.location-header p {
+    color: var(--muted);
+    font-size: 1.1rem;
+}
+
+.location-container {
+    display: grid;
+    grid-template-columns: 1fr 350px;
+    gap: 30px;
+}
+
+@media (max-width: 900px) {
+    .location-container {
+        grid-template-columns: 1fr;
+    }
+}
+
+.map-section {
+    background: var(--card);
+    border-radius: 16px;
+    overflow: hidden;
+    border: 1px solid var(--accent);
+}
+
+#map {
+    width: 100%;
+    height: 500px;
+}
+
+@media (max-width: 600px) {
+    #map {
+        height: 350px;
+    }
+}
+
+.shop-info-panel {
+    display: flex;
+    flex-direction: column;
+    gap: 20px;
+}
+
+.shop-card {
+    background: var(--card);
+    border-radius: 16px;
+    padding: 25px;
+    border: 1px solid var(--accent);
+}
+
+.shop-card h2 {
+    color: var(--accent);
+    margin-bottom: 15px;
+    font-size: 1.5rem;
+}
+
+.shop-details {
+    display: flex;
+    flex-direction: column;
+    gap: 12px;
+}
+
+.detail-item {
+    display: flex;
+    align-items: flex-start;
+    gap: 12px;
+    padding: 10px;
+    background: rgba(255,255,255,0.03);
+    border-radius: 8px;
+}
+
+.detail-icon {
+    font-size: 1.5rem;
+    min-width: 30px;
+    text-align: center;
+}
+
+.detail-text {
+    flex: 1;
+}
+
+.detail-label {
+    font-size: 0.8rem;
+    color: var(--muted);
+    margin-bottom: 2px;
+}
+
+.detail-value {
+    font-weight: 500;
+    color: var(--text);
+}
+
+.action-buttons {
+    display: flex;
+    flex-direction: column;
+    gap: 10px;
+    margin-top: 15px;
+}
+
+.btn-direction {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 10px;
+    padding: 14px 20px;
+    background: linear-gradient(135deg, #d4af37 0%, #b8860b 100%);
+    color: #0f1424;
+    border: none;
+    border-radius: 10px;
+    font-size: 1rem;
+    font-weight: 600;
+    cursor: pointer;
+    text-decoration: none;
+    transition: all 0.3s;
+}
+
+.btn-direction:hover {
+    transform: translateY(-2px);
+    box-shadow: 0 4px 15px rgba(212, 175, 55, 0.4);
+}
+
+.btn-secondary {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 10px;
+    padding: 12px 20px;
+    background: transparent;
+    color: var(--accent);
+    border: 2px solid var(--accent);
+    border-radius: 10px;
+    font-size: 1rem;
+    font-weight: 600;
+    cursor: pointer;
+    transition: all 0.3s;
+}
+
+.btn-secondary:hover {
+    background: var(--accent);
+    color: var(--bg);
+}
+
+.user-location-card {
+    background: var(--card);
+    border-radius: 16px;
+    padding: 20px;
+    border: 1px solid var(--accent);
+}
+
+.user-location-card h3 {
+    color: var(--accent);
+    margin-bottom: 15px;
+    font-size: 1.1rem;
+}
+
+.location-status {
+    padding: 12px;
+    border-radius: 8px;
+    text-align: center;
+    margin-bottom: 15px;
+}
+
+.location-status.detecting {
+    background: rgba(212, 175, 55, 0.1);
+    color: var(--accent);
+}
+
+.location-status.found {
+    background: rgba(76, 175, 80, 0.1);
+    color: #4caf50;
+}
+
+.location-status.error {
+    background: rgba(244, 67, 54, 0.1);
+    color: #f44336;
+}
+
+.distance-info {
+    display: none;
+    text-align: center;
+    padding: 15px;
+    background: rgba(212, 175, 55, 0.1);
+    border-radius: 8px;
+    margin-top: 10px;
+}
+
+.distance-info.show {
+    display: block;
+}
+
+.distance-value {
+    font-size: 2rem;
+    font-weight: bold;
+    color: var(--accent);
+}
+
+.distance-label {
+    color: var(--muted);
+    font-size: 0.9rem;
+}
+
+.btn-get-location {
+    width: 100%;
+    padding: 12px;
+    background: var(--accent);
+    color: var(--bg);
+    border: none;
+    border-radius: 8px;
+    font-weight: 600;
+    cursor: pointer;
+    transition: all 0.3s;
+}
+
+.btn-get-location:hover {
+    opacity: 0.9;
+}
+
+.btn-get-location:disabled {
+    opacity: 0.5;
+    cursor: not-allowed;
+}
+
+.shop-hours {
+    background: var(--card);
+    border-radius: 16px;
+    padding: 20px;
+    border: 1px solid var(--accent);
+}
+
+.shop-hours h3 {
+    color: var(--accent);
+    margin-bottom: 15px;
+}
+
+.hours-table {
+    width: 100%;
+}
+
+.hours-row {
+    display: flex;
+    justify-content: space-between;
+    padding: 8px 0;
+    border-bottom: 1px solid rgba(255,255,255,0.1);
+}
+
+.hours-row:last-child {
+    border-bottom: none;
+}
+
+.hours-row.today {
+    color: var(--accent);
+    font-weight: 600;
+}
+
+.operating-status {
+    display: inline-block;
+    padding: 4px 12px;
+    border-radius: 20px;
+    font-size: 0.85rem;
+    font-weight: bold;
+    margin-left: 10px;
+}
+
+.operating-status.open {
+    background: rgba(76, 175, 80, 0.2);
+    color: #4caf50;
+}
+
+.operating-status.closed {
+    background: rgba(244, 67, 54, 0.2);
+    color: #f44336;
+}
+
+/* Custom Map Marker */
+.custom-marker {
+    background: linear-gradient(135deg, #d4af37 0%, #b8860b 100%);
+    color: #0f1424;
+    padding: 10px 15px;
+    border-radius: 8px;
+    font-weight: bold;
+    box-shadow: 0 4px 15px rgba(0,0,0,0.3);
+    white-space: nowrap;
+}
+
+.custom-marker::after {
+    content: '';
+    position: absolute;
+    bottom: -8px;
+    left: 50%;
+    transform: translateX(-50%);
+    border-left: 8px solid transparent;
+    border-right: 8px solid transparent;
+    border-top: 8px solid #b8860b;
+}
+</style>
+{% endblock %}
+
+{% block content %}
+<div class="location-page">
+    <div class="location-header">
+        <h1>📍 Visit Our Store</h1>
+        <p>Experience our beautiful jewelry collection in person</p>
+    </div>
+
+    <div class="location-container">
+        <div class="map-section">
+            <div id="map"></div>
+        </div>
+
+        <div class="shop-info-panel">
+            <div class="shop-card">
+                <h2>🏪 Shri Jewellery</h2>
+                <div class="shop-details">
+                    <div class="detail-item">
+                        <span class="detail-icon">📍</span>
+                        <div class="detail-text">
+                            <div class="detail-label">Address</div>
+                            <div class="detail-value">Chinya, Nagamangala Taluk, Mandya District, Mysore Main Road, Karnataka, India</div>
+                        </div>
+                    </div>
+                    <div class="detail-item">
+                        <span class="detail-icon">📞</span>
+                        <div class="detail-text">
+                            <div class="detail-label">Phone</div>
+                            <div class="detail-value">+91 6363650179</div>
+                        </div>
+                    </div>
+                    <div class="detail-item">
+                        <span class="detail-icon">📞</span>
+                        <div class="detail-text">
+                            <div class="detail-label">Alternate</div>
+                            <div class="detail-value">+91 89044 39579</div>
+                        </div>
+                    </div>
+                </div>
+                <div class="action-buttons">
+                    <a href="https://www.google.com/maps/dir/?api=1&destination=12.7721,76.5121" target="_blank" class="btn-direction">
+                        🚗 Get Directions
+                    </a>
+                    <a href="tel:+916363650179" class="btn-secondary">
+                        📞 Call Now
+                    </a>
+                </div>
+            </div>
+
+            <div class="user-location-card">
+                <h3>📱 Your Location</h3>
+                <div id="location-status" class="location-status detecting">
+                    Click below to find distance from you
+                </div>
+                <button id="btn-find-location" class="btn-get-location" onclick="getUserLocation()">
+                    📍 Find My Location
+                </button>
+                <div id="distance-info" class="distance-info">
+                    <div class="distance-value" id="distance-value">--</div>
+                    <div class="distance-label">from our store</div>
+                </div>
+            </div>
+
+            <div class="shop-hours">
+                <h3>🕐 Store Hours <span id="operating-status" class="operating-status"></span></h3>
+                <div class="hours-table">
+                    <div class="hours-row" data-day="0"><span>Sunday</span><span>Closed</span></div>
+                    <div class="hours-row" data-day="1"><span>Monday</span><span>10:00 AM - 8:00 PM</span></div>
+                    <div class="hours-row" data-day="2"><span>Tuesday</span><span>10:00 AM - 8:00 PM</span></div>
+                    <div class="hours-row" data-day="3"><span>Wednesday</span><span>10:00 AM - 8:00 PM</span></div>
+                    <div class="hours-row" data-day="4"><span>Thursday</span><span>10:00 AM - 8:00 PM</span></div>
+                    <div class="hours-row" data-day="5"><span>Friday</span><span>10:00 AM - 8:00 PM</span></div>
+                    <div class="hours-row" data-day="6"><span>Saturday</span><span>10:00 AM - 8:00 PM</span></div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}
+
+{% block scripts %}
+<script>
+// Shop location coordinates (Chinya, Nagamangala Taluk, Mandya District)
+const SHOP_LOCATION = {
+    lat: 12.7721,
+    lng: 76.5121,
+    name: 'Shri Jewellery',
+    address: 'Chinya, Nagamangala Taluk, Mandya District, Mysore Main Road',
+    phone: '+91 6363650179'
+};
+
+let map;
+let userMarker;
+let shopMarker;
+
+function initMap() {
+    // Create map centered on shop location
+    map = new google.maps.Map(document.getElementById('map'), {
+        zoom: 15,
+        center: SHOP_LOCATION,
+        mapTypeControl: false,
+        streetViewControl: false,
+        fullscreenControl: true,
+    });
+
+    // Custom shop marker
+    const markerIcon = {
+        path: google.maps.SymbolPath.CIRCLE,
+        scale: 15,
+        fillColor: '#d4af37',
+        fillOpacity: 1,
+        strokeColor: '#ffffff',
+        strokeWeight: 3,
+    };
+
+    shopMarker = new google.maps.Marker({
+        position: SHOP_LOCATION,
+        map: map,
+        icon: markerIcon,
+        title: SHOP_LOCATION.name,
+        animation: google.maps.Animation.DROP
+    });
+
+    // Info window for shop marker
+    const infoWindow = new google.maps.InfoWindow({
+        content: `
+            <div style="padding: 15px; min-width: 200px;">
+                <h3 style="color: #d4af37; margin: 0 0 10px 0;">🏪 Shri Jewellery</h3>
+                <p style="margin: 5px 0; font-size: 14px;">📍 ${SHOP_LOCATION.address}</p>
+                <p style="margin: 5px 0; font-size: 14px;">📞 ${SHOP_LOCATION.phone}</p>
+                <a href="https://www.google.com/maps/dir/?api=1&destination=${SHOP_LOCATION.lat},${SHOP_LOCATION.lng}" 
+                   target="_blank" 
+                   style="display: inline-block; margin-top: 10px; padding: 8px 15px; background: #d4af37; color: #0f1424; text-decoration: none; border-radius: 5px; font-weight: bold;">
+                    🚗 Get Directions
+                </a>
+            </div>
+        `
+    });
+
+    shopMarker.addListener('click', () => {
+        infoWindow.open(map, shopMarker);
+    });
+
+    // Check operating status
+    checkOperatingStatus();
+}
+
+function checkOperatingStatus() {
+    const now = new Date();
+    const day = now.getDay();
+    const hours = now.getHours();
+    const statusEl = document.getElementById('operating-status');
+    const todayRow = document.querySelector(`.hours-row[data-day="${day}"]`);
+    
+    // Highlight today
+    document.querySelectorAll('.hours-row').forEach(row => row.classList.remove('today'));
+    if (todayRow) todayRow.classList.add('today');
+
+    // Check if open (Mon-Sat: 10AM-8PM)
+    if (day === 0) {
+        statusEl.textContent = 'CLOSED';
+        statusEl.className = 'operating-status closed';
+    } else if (hours >= 10 && hours < 20) {
+        statusEl.textContent = 'OPEN NOW';
+        statusEl.className = 'operating-status open';
+    } else {
+        statusEl.textContent = 'CLOSED';
+        statusEl.className = 'operating-status closed';
+    }
+}
+
+function getUserLocation() {
+    const btn = document.getElementById('btn-find-location');
+    const statusEl = document.getElementById('location-status');
+    const distanceEl = document.getElementById('distance-info');
+
+    if (!navigator.geolocation) {
+        statusEl.textContent = 'Geolocation is not supported by your browser';
+        statusEl.className = 'location-status error';
+        return;
+    }
+
+    btn.disabled = true;
+    btn.textContent = '📍 Detecting...';
+    statusEl.textContent = 'Finding your location...';
+    statusEl.className = 'location-status detecting';
+
+    navigator.geolocation.getCurrentPosition(
+        (position) => {
+            const userLat = position.coords.latitude;
+            const userLng = position.coords.longitude;
+
+            // Add user marker
+            if (userMarker) {
+                userMarker.setMap(null);
+            }
+
+            userMarker = new google.maps.Marker({
+                position: { lat: userLat, lng: userLng },
+                map: map,
+                icon: {
+                    path: google.maps.SymbolPath.CIRCLE,
+                    scale: 10,
+                    fillColor: '#4285F4',
+                    fillOpacity: 1,
+                    strokeColor: '#ffffff',
+                    strokeWeight: 3,
+                },
+                title: 'Your Location'
+            });
+
+            // Draw line between user and shop
+            new google.maps.Polyline({
+                path: [
+                    { lat: userLat, lng: userLng },
+                    SHOP_LOCATION
+                ],
+                map: map,
+                strokeColor: '#d4af37',
+                strokeOpacity: 0.8,
+                strokeWeight: 3,
+                geodesic: true
+            });
+
+            // Calculate distance
+            const distance = calculateDistance(userLat, userLng, SHOP_LOCATION.lat, SHOP_LOCATION.lng);
+            
+            statusEl.textContent = '📍 Location found!';
+            statusEl.className = 'location-status found';
+            
+            document.getElementById('distance-value').textContent = distance;
+            distanceEl.classList.add('show');
+
+            // Pan map to show both markers
+            const bounds = new google.maps.LatLngBounds();
+            bounds.extend({ lat: userLat, lng: userLng });
+            bounds.extend(SHOP_LOCATION);
+            map.fitBounds(bounds, 50);
+
+            btn.disabled = false;
+            btn.textContent = '📍 Update Location';
+        },
+        (error) => {
+            btn.disabled = false;
+            btn.textContent = '📍 Find My Location';
+            
+            switch (error.code) {
+                case error.PERMISSION_DENIED:
+                    statusEl.textContent = 'Location access denied. Please enable location in browser settings.';
+                    break;
+                case error.POSITION_UNAVAILABLE:
+                    statusEl.textContent = 'Location information unavailable.';
+                    break;
+                case error.TIMEOUT:
+                    statusEl.textContent = 'Location request timed out.';
+                    break;
+                default:
+                    statusEl.textContent = 'An error occurred while detecting location.';
+            }
+            statusEl.className = 'location-status error';
+        },
+        {
+            enableHighAccuracy: true,
+            timeout: 10000,
+            maximumAge: 0
+        }
+    );
+}
+
+// Calculate distance between two points using Haversine formula
+function calculateDistance(lat1, lon1, lat2, lon2) {
+    const R = 6371; // Radius of the Earth in km
+    const dLat = toRad(lat2 - lat1);
+    const dLon = toRad(lon2 - lon1);
+    const a = Math.sin(dLat/2) * Math.sin(dLat/2) +
+              Math.cos(toRad(lat1)) * Math.cos(toRad(lat2)) *
+              Math.sin(dLon/2) * Math.sin(dLon/2);
+    const c = 2 * Math.atan2(Math.sqrt(a), Math.sqrt(1-a));
+    const d = R * c;
+    
+    if (d < 1) {
+        return Math.round(d * 1000) + ' m';
+    } else {
+        return d.toFixed(1) + ' km';
+    }
+}
+
+function toRad(deg) {
+    return deg * (Math.PI / 180);
+}
+
+// Initialize map when script loads
+window.initMap = initMap;
+</script>
+
+<!-- Google Maps API - Replace YOUR_API_KEY with your actual Google Maps API key -->
+<script async defer
+    src="https://maps.googleapis.com/maps/api/js?key=AIzaSyBxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx&callback=initMap">
+</script>
+
+<!-- Fallback if Google Maps fails to load -->
+<script>
+window.addEventListener('load', () => {
+    setTimeout(() => {
+        if (typeof google === 'undefined' || typeof google.maps === 'undefined') {
+            document.getElementById('map').innerHTML = `
+                <div style="display: flex; flex-direction: column; align-items: center; justify-content: center; height: 100%; padding: 40px; text-align: center; background: linear-gradient(135deg, #1a1a2e 0%, #16213e 100%);">
+                    <div style="font-size: 4rem; margin-bottom: 20px;">📍</div>
+                    <h2 style="color: #d4af37; margin-bottom: 15px;">Shri Jewellery</h2>
+                    <p style="color: #888; margin-bottom: 10px;">Chinya, Nagamangala Taluk, Mandya District</p>
+                    <p style="color: #888; margin-bottom: 20px;">Mysore Main Road, Karnataka, India</p>
+                    <a href="https://www.google.com/maps/dir/?api=1&destination=12.7721,76.5121" 
+                       target="_blank" 
+                       style="padding: 15px 30px; background: #d4af37; color: #0f1424; text-decoration: none; border-radius: 10px; font-weight: bold;">
+                        🚗 Open in Google Maps
+                    </a>
+                </div>
+            `;
+        }
+    }, 3000);
+});
+</script>
+{% endblock %}

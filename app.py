@@ -369,6 +369,11 @@ def try_on():
     return render_template('try_on.html', user=session.get('user'))
 
 
+@app.route('/location')
+def location():
+    return render_template('location.html', user=session.get('user'))
+
+
 # ==================== GIFT VOUCHER SYSTEM ====================
 
 @app.route('/gift-voucher')
