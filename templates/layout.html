@@ -9,23 +9,34 @@
     <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;600;800&display=swap" rel="stylesheet">
     <link rel="stylesheet" href="/static/css/styles.css" />
     <link rel="icon" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'><text y='.9em' font-size='90'>💎</text></svg>">
+    <style>
+      .nav { display: flex; flex-wrap: wrap; gap: 8px; align-items: center; }
+      .nav a, .nav button { padding: 8px 14px; font-size: 0.85rem; }
+      .user-info { color: #d4af37; font-size: 0.85rem; }
+      @media (max-width: 768px) {
+        .nav { gap: 5px; }
+        .nav a, .nav button { padding: 6px 10px; font-size: 0.75rem; }
+      }
+    </style>
   </head>
   <body>
     <header class="site-header">
       <div class="container header-inner">
-        <a class="brand" href="/">Shri Jewellery</a>
+        <a class="brand" href="/">💎 Shri Jewellery</a>
         <nav class="nav">
-          <a href="/gift-voucher" class="btn voucher-btn">🎁 Gift Voucher</a>
+          <a href="/" class="btn secondary">🏠 Home</a>
+          <a href="/gift-voucher" class="btn voucher-btn">🎁 Vouchers</a>
           <a href="/location" class="btn secondary">📍 Location</a>
-          <a href="/try-on" class="btn secondary">Try On</a>
+          <a href="/try-on" class="btn secondary">📱 Try On</a>
+          <a href="/track" class="btn secondary">📦 Track</a>
           {% if user %}
-            <span class="user-info">Welcome, {{ user.phone }}</span>
-            <a href="/vouchers" class="btn secondary">My Vouchers</a>
-            <a href="/logout" class="btn secondary">Logout</a>
+            <span class="user-info">👤 {{ user.phone }}</span>
+            <a href="/vouchers" class="btn secondary">🎫 My Vouchers</a>
+            <a href="/logout" class="btn" style="background:#f44336;color:white;">Logout</a>
           {% else %}
-            <a href="/login" class="btn primary">Login</a>
+            <a href="/login" class="btn primary">🔐 Login</a>
           {% endif %}
-          <button id="open-cart" class="btn">Cart</button>
+          <button id="open-cart" class="btn" style="background:#d4af37;color:#0f1424;">🛒 Cart</button>
         </nav>
       </div>
     </header>
@@ -37,15 +48,15 @@
     <footer class="site-footer">
       <div class="container footer-inner">
         <div>
-          <strong>Address:</strong>
-          <div>Chinya, Nagamangala Taluk, Mandya District, Mysore Main Road</div>
+          <strong>📍 Address:</strong>
+          <div>Chinya Post Office, PP32+J2X, Honakere, Karnataka 571431</div>
         </div>
         <div>
-          <strong>Phone:</strong>
+          <strong>📞 Phone:</strong>
           <div>+91 6363650179 / +91 89044 39579</div>
         </div>
         <div style="margin-top:15px;">
-          <a href="/admin" style="color:#888;font-size:0.8rem;text-decoration:none;">Admin Panel</a>
+          <a href="/admin" style="color:#d4af37;font-size:0.8rem;text-decoration:none;">⚙️ Admin Panel</a>
         </div>
       </div>
     </footer>
