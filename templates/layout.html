@@ -24,19 +24,19 @@
       <div class="container header-inner">
         <a class="brand" href="/">💎 Shri Jewellery</a>
         <nav class="nav">
-          <a href="/" class="btn secondary">🏠 Home</a>
-          <a href="/gift-voucher" class="btn voucher-btn">🎁 Vouchers</a>
-          <a href="/try-on" class="btn secondary">📱 Try On</a>
-          <a href="/track" class="btn secondary">📦 Track</a>
-          <a href="/contact" class="btn secondary">📞 Contact</a>
           {% if user %}
+            <a href="/" class="btn secondary">🏠 Home</a>
+            <a href="/gift-voucher" class="btn voucher-btn">🎁 Vouchers</a>
+            <a href="/try-on" class="btn secondary">📱 Try On</a>
+            <a href="/track" class="btn secondary">📦 Track</a>
+            <a href="/contact" class="btn secondary">📞 Contact</a>
             <span class="user-info">👤 {{ user.phone }}</span>
             <a href="/vouchers" class="btn secondary">🎫 My Vouchers</a>
             <a href="/logout" class="btn" style="background:#f44336;color:white;">Logout</a>
+            <button id="open-cart" class="btn" style="background:#d4af37;color:#0f1424;">🛒 Cart</button>
           {% else %}
             <a href="/login" class="btn primary">🔐 Login</a>
           {% endif %}
-          <button id="open-cart" class="btn" style="background:#d4af37;color:#0f1424;">🛒 Cart</button>
         </nav>
       </div>
     </header>
