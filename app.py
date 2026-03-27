@@ -194,12 +194,19 @@ def api_verify_otp():
     phone = request.json.get('phone')
     otp = request.json.get('otp')
 
-    if not all([phone, otp, session.get('otp'), session.get('otp_phone')]) or \
-       phone != session['otp_phone'] or \
-       otp != session['otp']:
+    stored_otp = session.get('otp')
+    stored_phone = session.get('otp_phone')
+    
+    # Debug
+    print(f"Verify: phone={phone}, otp={otp}, stored_otp={stored_otp}, stored_phone={stored_phone}")
+
+    if not all([phone, otp, stored_otp, stored_phone]) or \
+       phone != stored_phone or \
+       otp != stored_otp:
         return jsonify({'error': 'Invalid OTP'}), 400
 
     # OTP is correct, log the user in
+    session.permanent = True
     session['user'] = {'phone': phone}
     session.pop('otp', None)
     session.pop('otp_phone', None)
