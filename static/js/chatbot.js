@@ -48,7 +48,7 @@
     <div style="padding: 16px; background: linear-gradient(135deg, #12182a 0%, #1e2640 100%); display: flex; align-items: center; justify-content: space-between; border-bottom: 1px solid #1e2640;">
       <div style="display: flex; align-items: center; gap: 8px;">
         <div style="width: 8px; height: 8px; background: #22c55e; border-radius: 50%;"></div>
-        <span style="font-weight: 700; color: #e8eefc;">AI Assistant</span>
+        <span style="font-weight: 700; color: #e8eefc;">Shri Jewellery</span>
       </div>
       <button id="close-chatbot" style="background: none; border: none; color: #aab2c8; font-size: 18px; cursor: pointer; padding: 4px;">✕</button>
     </div>
@@ -103,7 +103,7 @@
           <div style="width: 6px; height: 6px; background: #aab2c8; border-radius: 50%; animation: pulse 1.4s infinite;"></div>
           <div style="width: 6px; height: 6px; background: #aab2c8; border-radius: 50%; animation: pulse 1.4s infinite 0.2s;"></div>
           <div style="width: 6px; height: 6px; background: #aab2c8; border-radius: 50%; animation: pulse 1.4s infinite 0.4s;"></div>
-          <span style="margin-left: 8px; font-size: 12px;">Assistant is typing...</span>
+          <span style="margin-left: 8px; font-size: 12px;">Please wait...</span>
         </div>
       `;
       bubble.id = 'typing-indicator';
