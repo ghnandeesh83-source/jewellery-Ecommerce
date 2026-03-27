@@ -15,13 +15,23 @@
             <input type="tel" id="phone" name="phone" placeholder="98765 43210" required>
           </div>
         </div>
-        <button type="button" id="send-otp-btn" class="btn primary full-width">Send OTP</button>
+        <button type="button" id="send-otp-btn" class="btn primary full-width">Send OTP via SMS</button>
+        <div style="text-align: center; margin: 15px 0; color: #666;">- OR -</div>
+        <button type="button" id="send-whatsapp-btn" class="btn whatsapp-btn full-width">
+          <span style="font-size: 18px;">📱</span> Get OTP via WhatsApp
+        </button>
+        <div id="otp-sent-message" style="color: #22c55e; font-size: 13px; margin-top: 10px; text-align: center; display: none;">OTP sent! Check your WhatsApp.</div>
+        <div id="whatsapp-link" style="margin-top: 15px; text-align: center; display: none;">
+          <p style="color: #666; font-size: 12px;">Or tap below to get OTP:</p>
+          <a id="whatsapp-link-btn" href="#" target="_blank" class="btn whatsapp-btn full-width" style="text-decoration: none;">
+            📱 Open WhatsApp for OTP
+          </a>
+        </div>
       </div>
       <div id="otp-step" style="display: none;">
         <div class="input-group">
           <label for="otp">Enter OTP</label>
-          <input type="text" id="otp" name="otp" placeholder="_ _ _ _ _ _" required>
-          <div id="mock-otp-display" class="mock-otp" style="display: none;"></div>
+          <input type="text" id="otp" name="otp" placeholder="_ _ _ _ _ _" required maxlength="6">
         </div>
         <button type="submit" class="btn primary full-width">Verify & Login</button>
         <button type="button" id="back-btn" class="btn secondary full-width">Back</button>
@@ -29,4 +39,15 @@
     </form>
   </div>
 </div>
+<style>
+  .whatsapp-btn {
+    background: linear-gradient(135deg, #25D366 0%, #128C7E 100%);
+    color: white;
+    border: none;
+    font-weight: 600;
+  }
+  .whatsapp-btn:hover {
+    background: linear-gradient(135deg, #128C7E 0%, #075E54 100%);
+  }
+</style>
 {% endblock %}

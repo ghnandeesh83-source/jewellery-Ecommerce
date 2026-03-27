@@ -2,6 +2,7 @@ import os
 import json
 import uuid
 from datetime import datetime, UTC
+from urllib.parse import quote
 from flask import Flask, render_template, jsonify, request, redirect, url_for, abort, session
 from dotenv import load_dotenv
 import random
@@ -125,6 +126,8 @@ def api_products():
 @app.route('/api/send-otp', methods=['POST'])
 def api_send_otp():
     phone = request.json.get('phone')
+    otp_type = request.json.get('type', 'sms')
+    
     if not phone or not phone.isdigit() or len(phone) != 10:
         return jsonify({'error': 'Invalid phone number'}), 400
 
@@ -132,6 +135,19 @@ def api_send_otp():
     otp = str(random.randint(100000, 999999))
     session['otp'] = otp
     session['otp_phone'] = phone
+    session['otp_created'] = datetime.now().isoformat()
+
+    # For WhatsApp: Generate WhatsApp deep link with pre-filled message
+    if otp_type == 'whatsapp':
+        message = f"🛍️ *Your Shri Jewellery OTP is: {otp}*\n\nEnter this code to login to your account."
+        whatsapp_url = f"https://wa.me/91{phone}?text={quote(message)}"
+        print(f"OTP for WhatsApp +91{phone}: {otp}")
+        return jsonify({
+            'success': True, 
+            'message': 'OTP ready on WhatsApp!',
+            'whatsapp_url': whatsapp_url,
+            'otp': otp  # For demo/testing - remove in production
+        })
 
     # Try to send via Twilio SMS
     try:
@@ -155,7 +171,7 @@ def api_send_otp():
 
     # Fallback: Print to console (for testing)
     print(f"OTP for +91{phone}: {otp}")
-    return jsonify({'success': True})
+    return jsonify({'success': True, 'otp': otp})  # Return OTP for demo/testing
 
 
 @app.route('/api/verify-otp', methods=['POST'])
