@@ -1,15 +1,65 @@
 {% extends 'layout.html' %}
+
+{% block extra_head %}
+<style>
+.hero { text-align: center; padding: 40px 20px; background: linear-gradient(135deg, #1a1a2e 0%, #16213e 100%); border-radius: 20px; margin-bottom: 20px; }
+.hero h1 { color: #d4af37; font-size: 2.5rem; margin-bottom: 10px; }
+.hero p { color: #aab2c8; font-size: 1.1rem; }
+
+.rates-bar { display: flex; justify-content: center; gap: 30px; flex-wrap: wrap; padding: 15px; background: rgba(212,175,55,0.1); border-radius: 12px; margin-bottom: 20px; border: 1px solid rgba(212,175,55,0.2); }
+.rates-bar .rate { text-align: center; }
+.rates-bar .rate-label { font-size: 0.75rem; color: #888; }
+.rates-bar .rate-value { font-size: 1.1rem; color: #d4af37; font-weight: bold; }
+
+.search-bar { display: flex; gap: 10px; margin-bottom: 20px; }
+.search-bar input { flex: 1; padding: 12px 16px; border-radius: 10px; border: 1px solid #283257; background: #0c1220; color: #e8eefc; font-size: 1rem; }
+.search-bar button { padding: 12px 24px; background: #d4af37; color: #0f1424; border: none; border-radius: 10px; font-weight: bold; cursor: pointer; }
+.search-results { display: none; position: absolute; top: 100%; left: 0; right: 0; background: #1a1a2e; border: 1px solid #d4af37; border-radius: 10px; max-height: 300px; overflow-y: auto; z-index: 100; }
+.search-results.show { display: block; }
+.search-result-item { padding: 10px 15px; display: flex; align-items: center; gap: 10px; border-bottom: 1px solid #283257; cursor: pointer; }
+.search-result-item:hover { background: rgba(212,175,55,0.1); }
+.search-result-item img { width: 40px; height: 40px; object-fit: cover; border-radius: 5px; }
+
+.wishlist-btn { position: absolute; top: 10px; right: 10px; background: rgba(0,0,0,0.5); border: none; border-radius: 50%; width: 35px; height: 35px; cursor: pointer; font-size: 18px; }
+.wishlist-btn:hover { background: #d4af37; }
+
+.hero-slider { margin-bottom: 20px; overflow: hidden; border-radius: 16px; }
+.hero-slider-track { display: flex; animation: slide 20s linear infinite; }
+@keyframes slide { 0% { transform: translateX(0); } 100% { transform: translateX(-50%); } }
+</style>
+{% endblock %}
+
 {% block content %}
 <section class="hero">
   <div class="hero-content">
-    <h1>Fine Jewellery for Everyone</h1>
+    <h1>💎 Fine Jewellery for Everyone</h1>
     <p>Gold, Silver, and Diamond pieces for Women, Men, and Children.</p>
   </div>
 </section>
 
-<!-- Premium hero slider for rings & chains -->
+<div class="rates-bar">
+  <div class="rate"><div class="rate-label">24K Gold</div><div class="rate-value">₹12,500/g</div></div>
+  <div class="rate"><div class="rate-label">22K Gold</div><div class="rate-value">₹11,500/g</div></div>
+  <div class="rate"><div class="rate-label">18K Gold</div><div class="rate-value">₹9,500/g</div></div>
+  <div class="rate"><div class="rate-label">Silver</div><div class="rate-value">₹90/g</div></div>
+  <div class="rate"><div class="rate-label">Diamond</div><div class="rate-value">₹15,000/ct</div></div>
+</div>
+
+<div class="search-bar">
+  <input id="search-input" placeholder="🔍 Search jewellery..." />
+  <button onclick="searchProducts()">Search</button>
+  <div id="search-results" class="search-results"></div>
+</div>
+
 <section class="hero-slider">
-  <div class="hero-slider-track"></div>
+  <div class="hero-slider-track">
+    <img src="https://images.unsplash.com/photo-1605100804763-247f67b3557e?w=400" alt="Ring" style="width:200px;height:150px;object-fit:cover;">
+    <img src="https://images.unsplash.com/photo-1599643478518-a784e5dc4c8f?w=400" alt="Necklace" style="width:200px;height:150px;object-fit:cover;">
+    <img src="https://images.unsplash.com/photo-1515562141207-7a88fb7ce338?w=400" alt="Diamond" style="width:200px;height:150px;object-fit:cover;">
+    <img src="https://images.unsplash.com/photo-1605100804763-247f67b3557e?w=400" alt="Ring" style="width:200px;height:150px;object-fit:cover;">
+    <img src="https://images.unsplash.com/photo-1599643478518-a784e5dc4c8f?w=400" alt="Necklace" style="width:200px;height:150px;object-fit:cover;">
+    <img src="https://images.unsplash.com/photo-1515562141207-7a88fb7ce338?w=400" alt="Diamond" style="width:200px;height:150px;object-fit:cover;">
+  </div>
 </section>
 
 <section class="filters">
@@ -45,7 +95,6 @@
 
 <section id="products" class="grid"></section>
 
-<!-- Cart Drawer -->
 <aside id="cart" class="cart">
   <div class="cart-header">
     <h3>Your Cart</h3>
@@ -79,4 +128,34 @@
 </aside>
 
 <div id="toast" class="toast" hidden></div>
+
+<script>
+async function searchProducts() {
+  const query = document.getElementById('search-input').value;
+  if (query.length < 2) return;
+  
+  const res = await fetch('/api/search?q=' + encodeURIComponent(query));
+  const data = await res.json();
+  
+  const resultsDiv = document.getElementById('search-results');
+  resultsDiv.innerHTML = data.results.map(p => `
+    <div class="search-result-item" onclick="viewProduct('${p.id}')">
+      <img src="${p.image || '/static/images/placeholder.svg'}" alt="${p.name}">
+      <div><strong>${p.name}</strong><br><small>${p.metal} | ₹${p.base_price}</small></div>
+    </div>
+  `).join('');
+  resultsDiv.classList.add('show');
+}
+
+function viewProduct(id) {
+  document.getElementById('search-results').classList.remove('show');
+  window.location.href = '/?product=' + id;
+}
+
+document.getElementById('search-input').addEventListener('input', function(e) {
+  if (e.target.value.length < 2) {
+    document.getElementById('search-results').classList.remove('show');
+  }
+});
+</script>
 {% endblock %}

@@ -1,0 +1,74 @@
+{% extends 'layout.html' %}
+
+{% block extra_head %}
+<style>
+.contact-page { max-width: 600px; margin: 0 auto; padding: 20px; }
+.contact-page h1 { color: var(--accent); text-align: center; margin-bottom: 30px; }
+.contact-form { background: var(--card); padding: 30px; border-radius: 20px; border: 1px solid var(--accent); }
+.form-group { margin-bottom: 20px; }
+.form-group label { display: block; margin-bottom: 8px; color: var(--text); font-weight: 600; }
+.form-group input, .form-group textarea { width: 100%; padding: 14px; border-radius: 10px; border: 1px solid var(--accent); background: var(--bg); color: var(--text); font-size: 1rem; }
+.form-group textarea { height: 120px; resize: none; }
+.submit-btn { width: 100%; padding: 16px; background: linear-gradient(135deg, #d4af37, #b8860b); color: #0f1424; border: none; border-radius: 12px; font-size: 1.1rem; font-weight: bold; cursor: pointer; transition: all 0.3s; }
+.submit-btn:hover { transform: translateY(-2px); box-shadow: 0 8px 20px rgba(212,175,55,0.4); }
+.contact-info { text-align: center; margin-top: 30px; padding: 20px; background: rgba(212,175,55,0.1); border-radius: 16px; }
+.contact-info p { margin: 10px 0; }
+</style>
+{% endblock %}
+
+{% block content %}
+<div class="contact-page">
+    <h1>📞 Contact Us</h1>
+    
+    <form class="contact-form" id="contact-form">
+        <div class="form-group">
+            <label>Your Name *</label>
+            <input type="text" id="contact-name" required placeholder="Enter your name" />
+        </div>
+        <div class="form-group">
+            <label>Email (optional)</label>
+            <input type="email" id="contact-email" placeholder="Enter your email" />
+        </div>
+        <div class="form-group">
+            <label>Message *</label>
+            <textarea id="contact-message" required placeholder="How can we help you?"></textarea>
+        </div>
+        <button type="submit" class="submit-btn">Send Message</button>
+    </form>
+    
+    <div class="contact-info">
+        <p><strong>📍 Address:</strong> Chinya Post Office, PP32+J2X, Honakere, Karnataka 571431</p>
+        <p><strong>📞 Phone:</strong> +91 6363650179</p>
+        <p><strong>📞 Alternate:</strong> +91 89044 39579</p>
+    </div>
+</div>
+
+<script>
+document.getElementById('contact-form').addEventListener('submit', async (e) => {
+    e.preventDefault();
+    
+    const name = document.getElementById('contact-name').value;
+    const email = document.getElementById('contact-email').value;
+    const message = document.getElementById('contact-message').value;
+    
+    try {
+        const res = await fetch('/api/contact', {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({ name, email, message })
+        });
+        
+        const data = await res.json();
+        
+        if (data.success) {
+            alert('Message sent! We will contact you soon.');
+            e.target.reset();
+        } else {
+            alert(data.error || 'Failed to send message');
+        }
+    } catch (err) {
+        alert('Error sending message');
+    }
+});
+</script>
+{% endblock %}

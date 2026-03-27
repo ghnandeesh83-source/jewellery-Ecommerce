@@ -295,6 +295,11 @@ def track():
     return render_template('track.html', order_id=order_id)
 
 
+@app.route('/contact')
+def contact():
+    return render_template('contact.html', user=session.get('user'))
+
+
 @app.route('/api/order/<order_id>/status')
 def api_order_status(order_id):
     order = ORDERS.get(order_id)
@@ -733,4 +738,284 @@ def api_admin_stats():
 
 
 if __name__ == '__main__':
-    app.run(debug=True)  # reload trigger
+    app.run(debug=True)
+
+
+# ==================== ADVANCED HACKATHON FEATURES ====================
+
+# Current metal rates (can be updated via admin)
+METAL_RATES = {
+    'gold_24k': 12500,  # per gram
+    'gold_22k': 11500,
+    'gold_18k': 9500,
+    'silver': 90,
+    'diamond_per_ct': 15000
+}
+
+@app.route('/api/metal-rates')
+def api_metal_rates():
+    """Get current metal rates"""
+    return jsonify({
+        'gold_24k': METAL_RATES['gold_24k'],
+        'gold_22k': METAL_RATES['gold_22k'],
+        'gold_18k': METAL_RATES['gold_18k'],
+        'silver': METAL_RATES['silver'],
+        'updated_at': datetime.now(UTC).isoformat()
+    })
+
+
+@app.route('/api/metal-rates', methods=['POST'])
+def api_update_metal_rates():
+    """Update metal rates (admin only)"""
+    if not session.get('admin'):
+        return jsonify({'error': 'Admin only'}), 401
+    data = request.get_json(force=True)
+    for key in METAL_RATES:
+        if key in data:
+            METAL_RATES[key] = int(data[key])
+    return jsonify({'success': True, 'rates': METAL_RATES})
+
+
+# Wishlist storage
+WISHLISTS = {}
+
+
+@app.route('/api/wishlist', methods=['GET'])
+def api_get_wishlist():
+    """Get user's wishlist"""
+    user_phone = session.get('user', {}).get('phone')
+    if not user_phone:
+        return jsonify({'items': []})
+    user_wishlist = WISHLISTS.get(user_phone, [])
+    return jsonify({'items': user_wishlist})
+
+
+@app.route('/api/wishlist', methods=['POST'])
+def api_add_wishlist():
+    """Add item to wishlist"""
+    user_phone = session.get('user', {}).get('phone')
+    if not user_phone:
+        return jsonify({'error': 'Login required'}), 401
+    
+    data = request.get_json(force=True)
+    product_id = data.get('product_id')
+    
+    if user_phone not in WISHLISTS:
+        WISHLISTS[user_phone] = []
+    
+    if product_id not in WISHLISTS[user_phone]:
+        WISHLISTS[user_phone].append(product_id)
+    
+    return jsonify({'success': True, 'count': len(WISHLISTS[user_phone])})
+
+
+@app.route('/api/wishlist/<product_id>', methods=['DELETE'])
+def api_remove_wishlist(product_id):
+    """Remove item from wishlist"""
+    user_phone = session.get('user', {}).get('phone')
+    if not user_phone:
+        return jsonify({'error': 'Login required'}), 401
+    
+    if user_phone in WISHLISTS and product_id in WISHLISTS[user_phone]:
+        WISHLISTS[user_phone].remove(product_id)
+    
+    return jsonify({'success': True})
+
+
+# Product ratings/reviews
+PRODUCT_RATINGS = {}
+
+
+@app.route('/api/products/<product_id>/rating', methods=['POST'])
+def api_rate_product(product_id):
+    """Rate a product"""
+    data = request.get_json(force=True)
+    rating = data.get('rating', 0)
+    review = data.get('review', '')
+    
+    if rating < 1 or rating > 5:
+        return jsonify({'error': 'Rating must be 1-5'}), 400
+    
+    if product_id not in PRODUCT_RATINGS:
+        PRODUCT_RATINGS[product_id] = {'ratings': [], 'reviews': []}
+    
+    PRODUCT_RATINGS[product_id]['ratings'].append(rating)
+    if review:
+        PRODUCT_RATINGS[product_id]['reviews'].append({
+            'rating': rating,
+            'review': review,
+            'date': datetime.now(UTC).isoformat()
+        })
+    
+    avg = sum(PRODUCT_RATINGS[product_id]['ratings']) / len(PRODUCT_RATINGS[product_id]['ratings'])
+    
+    return jsonify({
+        'success': True,
+        'average_rating': round(avg, 1),
+        'total_ratings': len(PRODUCT_RATINGS[product_id]['ratings'])
+    })
+
+
+@app.route('/api/products/<product_id>/rating')
+def api_get_product_rating(product_id):
+    """Get product rating"""
+    if product_id not in PRODUCT_RATINGS:
+        return jsonify({'average_rating': 0, 'total_ratings': 0, 'reviews': []})
+    
+    ratings = PRODUCT_RATINGS[product_id]['ratings']
+    avg = sum(ratings) / len(ratings) if ratings else 0
+    
+    return jsonify({
+        'average_rating': round(avg, 1),
+        'total_ratings': len(ratings),
+        'reviews': PRODUCT_RATINGS[product_id]['reviews'][-5:]  # Last 5 reviews
+    })
+
+
+# Search functionality
+@app.route('/api/search')
+def api_search():
+    """Search products"""
+    query = request.args.get('q', '').lower()
+    if len(query) < 2:
+        return jsonify({'results': []})
+    
+    results = []
+    for p in PRODUCTS:
+        if (query in p.get('name', '').lower() or 
+            query in p.get('type', '').lower() or 
+            query in p.get('metal', '').lower() or
+            query in p.get('audience', '').lower()):
+            results.append(p)
+    
+    return jsonify({'results': results[:20]})
+
+
+# Analytics - popular products
+@app.route('/api/analytics/popular')
+def api_popular_products():
+    """Get popular products"""
+    # Sort by base price as proxy for popularity
+    sorted_products = sorted(PRODUCTS, key=lambda x: x.get('base_price', 0), reverse=True)
+    return jsonify({'products': sorted_products[:10]})
+
+
+# Social sharing links
+@app.route('/api/share/<product_id>')
+def api_share_product(product_id):
+    """Get shareable links for product"""
+    product = next((p for p in PRODUCTS if p.get('id') == product_id), None)
+    if not product:
+        return jsonify({'error': 'Product not found'}), 404
+    
+    name = product.get('name', 'Jewelry')
+    price = product.get('base_price', 0)
+    
+    share_text = f"Check out this {name} at Shri Jewellery! Price: ₹{price}"
+    
+    return jsonify({
+        'whatsapp': f"https://wa.me/?text={quote(share_text)}",
+        'facebook': f"https://www.facebook.com/sharer/sharer.php?u={quote('https://shrijewellery.com')}",
+        'twitter': f"https://twitter.com/intent/tweet?text={quote(share_text)}"
+    })
+
+
+# Order timeline
+@app.route('/api/order/<order_id>/timeline')
+def api_order_timeline(order_id):
+    """Get order timeline"""
+    order = ORDERS.get(order_id)
+    if not order:
+        return jsonify({'error': 'Order not found'}), 404
+    
+    timeline = [
+        {'status': 'Order Placed', 'date': order.get('created_at'), 'completed': True}
+    ]
+    
+    status_order = ['Confirmed', 'Processing', 'Shipped', 'Out for Delivery', 'Delivered']
+    current_status = order.get('status', 'Confirmed')
+    
+    for i, status in enumerate(status_order):
+        completed = status_order.index(current_status) >= i if current_status in status_order else False
+        timeline.append({
+            'status': status,
+            'date': order.get('created_at') if completed else None,
+            'completed': completed
+        })
+    
+    return jsonify({'timeline': timeline})
+
+
+# Newsletter signup
+NEWSLETTER = []
+
+
+@app.route('/api/newsletter', methods=['POST'])
+def api_newsletter():
+    """Subscribe to newsletter"""
+    data = request.get_json(force=True)
+    email = data.get('email', '').strip()
+    
+    if not email or '@' not in email:
+        return jsonify({'error': 'Invalid email'}), 400
+    
+    if email not in NEWSLETTER:
+        NEWSLETTER.append(email)
+    
+    return jsonify({'success': True, 'message': 'Subscribed successfully!'})
+
+
+# Contact form
+@app.route('/api/contact', methods=['POST'])
+def api_contact():
+    """Contact form submission"""
+    data = request.get_json(force=True)
+    name = data.get('name', '').strip()
+    email = data.get('email', '').strip()
+    message = data.get('message', '').strip()
+    
+    if not name or not message:
+        return jsonify({'error': 'Name and message required'}), 400
+    
+    # Store contact (in memory for demo)
+    if 'contacts' not in globals():
+        globals()['contacts'] = []
+    
+    globals()['contacts'].append({
+        'name': name,
+        'email': email,
+        'message': message,
+        'date': datetime.now(UTC).isoformat()
+    })
+    
+    return jsonify({'success': True, 'message': 'Message sent! We will contact you soon.'})
+
+
+# Price calculator
+@app.route('/api/price-calculator', methods=['POST'])
+def api_price_calculator():
+    """Calculate jewelry price based on metal weight"""
+    data = request.get_json(force=True)
+    metal = data.get('metal', 'gold')
+    weight = float(data.get('weight', 0))  # in grams
+    purity = data.get('purity', '22k')
+    making_charge = float(data.get('making_charge', 0))
+    
+    rate_key = f"{metal}_{purity}"
+    if rate_key not in METAL_RATES:
+        rate_key = 'gold_22k' if metal == 'gold' else 'silver'
+    
+    metal_price = METAL_RATES.get(rate_key, 0)
+    total = (weight * metal_price) + making_charge
+    
+    return jsonify({
+        'metal_price': metal_price,
+        'weight': weight,
+        'making_charge': making_charge,
+        'total_price': total,
+        'breakdown': {
+            'metal_cost': weight * metal_price,
+            'making_charge': making_charge,
+            'total': total
+        }
+    })
