@@ -134,8 +134,9 @@ def api_send_otp():
     session['otp_phone'] = phone
 
     # In a real app, you would send this OTP via SMS
-    # For this demo, we'll return it in the response
-    return jsonify({'mock_otp': otp})
+    # For this demo, we don't return OTP to screen
+    print(f"OTP for {phone}: {otp}")  # Only visible in server console
+    return jsonify({'success': True})
 
 
 @app.route('/api/verify-otp', methods=['POST'])

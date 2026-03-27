@@ -29,7 +29,9 @@ document.addEventListener('DOMContentLoaded', () => {
       }
 
       const data = await response.json();
-      mockOtpDisplay.textContent = `Mock OTP: ${data.mock_otp}`;
+      const sentMsg = document.getElementById('otp-sent-message');
+      if (sentMsg) sentMsg.style.display = 'block';
+      mockOtpDisplay.textContent = ``;
       phoneStep.style.display = 'none';
       otpStep.style.display = 'block';
     } catch (error) {
