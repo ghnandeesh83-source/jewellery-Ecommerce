@@ -364,6 +364,8 @@ def api_unsplash():
 
 @app.route('/try-on')
 def try_on():
+    if not session.get('user'):
+        return redirect(url_for('login'))
     return render_template('try_on.html')
 
 
@@ -371,11 +373,15 @@ def try_on():
 
 @app.route('/gift-voucher')
 def gift_voucher():
+    if not session.get('user'):
+        return redirect(url_for('login'))
     return render_template('gift_voucher.html', amounts=VOUCHER_AMOUNTS, themes=VOUCHER_THEMES)
 
 
 @app.route('/vouchers')
 def vouchers():
+    if not session.get('user'):
+        return redirect(url_for('login'))
     user_phone = session.get('user', {}).get('phone')
     user_vouchers = []
     for code, voucher in VOUCHERS.items():
