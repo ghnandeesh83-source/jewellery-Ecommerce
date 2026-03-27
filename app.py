@@ -43,6 +43,21 @@ else:
 # In-memory order store (demo)
 ORDERS = {}
 
+# In-memory voucher store
+VOUCHERS = {}
+
+# Gift Voucher amounts
+VOUCHER_AMOUNTS = [500, 1000, 2000, 5000, 10000]
+
+# Festive themes
+VOUCHER_THEMES = {
+    'default': {'name': 'Classic', 'color': '#d4af37', 'bg': 'linear-gradient(135deg, #667eea 0%, #764ba2 100%)'},
+    'diwali': {'name': 'Diwali', 'color': '#ff9800', 'bg': 'linear-gradient(135deg, #f12711 0%, #f5af19 100%)'},
+    'wedding': {'name': 'Wedding', 'color': '#e91e63', 'bg': 'linear-gradient(135deg, #f093fb 0%, #f5576c 100%)'},
+    'birthday': {'name': 'Birthday', 'color': '#9c27b0', 'bg': 'linear-gradient(135deg, #667eea 0%, #f093fb 100%)'},
+    'anniversary': {'name': 'Anniversary', 'color': '#c62828', 'bg': 'linear-gradient(135deg, #ff416c 0%, #ff4b2b 100%)'},
+}
+
 # Email setup (optional)
 mail = None
 if Mail:
@@ -315,6 +330,177 @@ def api_unsplash():
 @app.route('/try-on')
 def try_on():
     return render_template('try_on.html')
+
+
+# ==================== GIFT VOUCHER SYSTEM ====================
+
+@app.route('/gift-voucher')
+def gift_voucher():
+    return render_template('gift_voucher.html', amounts=VOUCHER_AMOUNTS, themes=VOUCHER_THEMES)
+
+
+@app.route('/vouchers')
+def vouchers():
+    user_phone = session.get('user', {}).get('phone')
+    user_vouchers = []
+    for code, voucher in VOUCHERS.items():
+        if voucher.get('sender_phone') == user_phone or voucher.get('recipient_phone') == user_phone:
+            user_vouchers.append({**voucher, 'code': code})
+    return render_template('my_vouchers.html', vouchers=user_vouchers)
+
+
+@app.route('/api/voucher/create', methods=['POST'])
+def api_create_voucher():
+    data = request.get_json(force=True)
+    
+    amount = int(data.get('amount', 0))
+    if amount not in VOUCHER_AMOUNTS and amount < 100:
+        return jsonify({'error': 'Invalid amount'}), 400
+    
+    sender_name = data.get('sender_name', '').strip()
+    recipient_name = data.get('recipient_name', '').strip()
+    recipient_phone = data.get('recipient_phone', '').strip()
+    recipient_email = data.get('recipient_email', '').strip()
+    message = data.get('message', '').strip()
+    theme = data.get('theme', 'default')
+    delivery_method = data.get('delivery_method', 'inapp')
+    delivery_date = data.get('delivery_date', datetime.now().strftime('%Y-%m-%d'))
+    
+    if not sender_name or not recipient_name:
+        return jsonify({'error': 'Name is required'}), 400
+    
+    # Generate unique voucher code
+    voucher_code = f"SJ-{uuid.uuid4().hex[:8].upper()}"
+    
+    # Set expiry date (1 year from now)
+    expiry_date = datetime.now(UTC).replace(year=datetime.now().year + 1)
+    
+    voucher = {
+        'code': voucher_code,
+        'amount': amount,
+        'balance': amount,
+        'sender_name': sender_name,
+        'sender_phone': session.get('user', {}).get('phone', ''),
+        'recipient_name': recipient_name,
+        'recipient_phone': recipient_phone,
+        'recipient_email': recipient_email,
+        'message': message,
+        'theme': theme,
+        'delivery_method': delivery_method,
+        'delivery_date': delivery_date,
+        'status': 'active',
+        'used_amount': 0,
+        'created_at': datetime.now(UTC).isoformat(),
+        'expiry_date': expiry_date.isoformat(),
+        'transactions': []
+    }
+    
+    VOUCHERS[voucher_code] = voucher
+    
+    # Send notification based on delivery method
+    if delivery_method == 'sms' and recipient_phone:
+        try:
+            send_sms(recipient_phone, f"🎁 You received a gift voucher worth ₹{amount} from {sender_name}! Code: {voucher_code}")
+        except Exception:
+            pass
+    
+    if delivery_method == 'email' and recipient_email:
+        try:
+            send_email(recipient_email, "🎁 You received a Gift Voucher!", 
+                      f"You received a gift voucher worth ₹{amount} from {sender_name}!\n\nVoucher Code: {voucher_code}\nMessage: {message}")
+        except Exception:
+            pass
+    
+    return jsonify({
+        'success': True,
+        'voucher_code': voucher_code,
+        'voucher': voucher
+    }), 201
+
+
+@app.route('/api/voucher/validate', methods=['POST'])
+def api_validate_voucher():
+    data = request.get_json(force=True)
+    code = data.get('code', '').strip().upper()
+    
+    if not code:
+        return jsonify({'error': 'Voucher code required'}), 400
+    
+    voucher = VOUCHERS.get(code)
+    
+    if not voucher:
+        return jsonify({'error': 'Invalid voucher code', 'valid': False}), 400
+    
+    # Check if expired
+    expiry = datetime.fromisoformat(voucher['expiry_date'].replace('Z', '+00:00'))
+    if datetime.now(expiry.tzinfo) > expiry:
+        return jsonify({'error': 'Voucher has expired', 'valid': False}), 400
+    
+    # Check if active
+    if voucher['status'] != 'active':
+        return jsonify({'error': 'Voucher is no longer active', 'valid': False}), 400
+    
+    # Check balance
+    if voucher['balance'] <= 0:
+        return jsonify({'error': 'Voucher balance is empty', 'valid': False}), 400
+    
+    return jsonify({
+        'valid': True,
+        'code': code,
+        'balance': voucher['balance'],
+        'amount': voucher['amount'],
+        'recipient_name': voucher['recipient_name'],
+        'message': voucher.get('message', '')
+    })
+
+
+@app.route('/api/voucher/redeem', methods=['POST'])
+def api_redeem_voucher():
+    data = request.get_json(force=True)
+    code = data.get('code', '').strip().upper()
+    amount_to_redeem = float(data.get('amount', 0))
+    order_id = data.get('order_id', '')
+    
+    if not code or amount_to_redeem <= 0:
+        return jsonify({'error': 'Invalid request'}), 400
+    
+    voucher = VOUCHERS.get(code)
+    
+    if not voucher:
+        return jsonify({'error': 'Invalid voucher code'}), 400
+    
+    if voucher['balance'] < amount_to_redeem:
+        return jsonify({'error': 'Insufficient balance', 'available': voucher['balance']}), 400
+    
+    # Redeem
+    voucher['balance'] -= amount_to_redeem
+    voucher['used_amount'] += amount_to_redeem
+    voucher['transactions'].append({
+        'type': 'redeem',
+        'amount': amount_to_redeem,
+        'order_id': order_id,
+        'date': datetime.now(UTC).isoformat()
+    })
+    
+    # Check if fully used
+    if voucher['balance'] <= 0:
+        voucher['status'] = 'fully_redeemed'
+    
+    return jsonify({
+        'success': True,
+        'redeemed_amount': amount_to_redeem,
+        'remaining_balance': voucher['balance'],
+        'voucher_code': code
+    })
+
+
+@app.route('/voucher/<code>')
+def view_voucher(code):
+    code = code.upper()
+    voucher = VOUCHERS.get(code)
+    if not voucher:
+        return render_template('voucher_not_found.html')
+    return render_template('view_voucher.html', voucher=voucher, themes=VOUCHER_THEMES)
 
 
 @app.route('/api/chat', methods=['POST'])

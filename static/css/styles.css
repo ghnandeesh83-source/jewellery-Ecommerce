@@ -498,3 +498,14 @@ html, body { margin: 0; padding: 0; font-family: Inter, system-ui, -apple-system
   border-radius: 8px;
   letter-spacing: 1px;
 }
+
+/* Voucher Button in Header */
+.voucher-btn {
+  background: linear-gradient(135deg, #f5576c 0%, #f093fb 100%);
+  color: white;
+  border: none;
+  font-weight: 600;
+}
+.voucher-btn:hover {
+  background: linear-gradient(135deg, #f093fb 0%, #f5576c 100%);
+}

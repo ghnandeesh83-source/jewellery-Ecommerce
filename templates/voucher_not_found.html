@@ -1,0 +1,12 @@
+{% extends 'layout.html' %}
+{% block content %}
+<section class="not-found" style="text-align: center; padding: 100px 20px;">
+  <h1 style="font-size: 72px; margin-bottom: 20px;">😕</h1>
+  <h2>Voucher Not Found</h2>
+  <p style="color: var(--muted); margin-bottom: 30px;">The voucher code you entered doesn't exist or has been removed.</p>
+  <div style="display: flex; gap: 15px; justify-content: center;">
+    <a href="/gift-voucher" class="btn primary">🎁 Create New Voucher</a>
+    <a href="/" class="btn secondary">← Back to Shop</a>
+  </div>
+</section>
+{% endblock %}

@@ -1,0 +1,281 @@
+{% extends 'layout.html' %}
+{% block content %}
+<section class="voucher-page">
+  <h1>🎁 Gift Vouchers</h1>
+  <p class="subtitle">Give the gift of beautiful jewellery</p>
+  
+  <div class="voucher-container">
+    <!-- Preview Card -->
+    <div class="voucher-preview">
+      <h3>Voucher Preview</h3>
+      <div id="voucher-card" class="gift-card default">
+        <div class="card-inner">
+          <div class="card-header">
+            <span class="brand">Shri Jewellery</span>
+            <span class="amount-preview">₹<span id="preview-amount">1000</span></span>
+          </div>
+          <div class="card-code">
+            <span id="preview-code">SJ-XXXXXXXX</span>
+          </div>
+          <div class="card-message" id="preview-message">Gift for you!</div>
+          <div class="card-footer">
+            <span id="preview-recipient">Recipient Name</span>
+            <span id="preview-theme" class="theme-badge">Classic</span>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- Voucher Form -->
+    <div class="voucher-form">
+      <h3>Create Gift Voucher</h3>
+      
+      <!-- Amount Selection -->
+      <div class="form-group">
+        <label>Select Amount</label>
+        <div class="amount-options">
+          {% for amt in amounts %}
+          <button type="button" class="amount-btn" data-amount="{{ amt }}">₹{{ amt }}</button>
+          {% endfor %}
+          <button type="button" class="amount-btn" data-amount="custom">Custom</button>
+        </div>
+        <input type="number" id="custom-amount" placeholder="Enter custom amount (min ₹100)" min="100" style="display:none; margin-top:10px;">
+      </div>
+
+      <!-- Theme Selection -->
+      <div class="form-group">
+        <label>Choose Theme</label>
+        <div class="theme-options">
+          {% for key, theme in themes.items() %}
+          <button type="button" class="theme-btn" data-theme="{{ key }}" style="background: {{ theme.bg }};">
+            {{ theme.name }}
+          </button>
+          {% endfor %}
+        </div>
+      </div>
+
+      <!-- Sender Details -->
+      <div class="form-group">
+        <label>Your Name</label>
+        <input type="text" id="sender-name" placeholder="Enter your name" required>
+      </div>
+
+      <!-- Recipient Details -->
+      <div class="form-group">
+        <label>Recipient Name</label>
+        <input type="text" id="recipient-name" placeholder="Enter recipient name" required>
+      </div>
+
+      <div class="form-row">
+        <div class="form-group">
+          <label>Recipient Phone (optional)</label>
+          <input type="tel" id="recipient-phone" placeholder="+91 XXXXX XXXXX">
+        </div>
+        <div class="form-group">
+          <label>Recipient Email (optional)</label>
+          <input type="email" id="recipient-email" placeholder="email@example.com">
+        </div>
+      </div>
+
+      <!-- Personal Message -->
+      <div class="form-group">
+        <label>Personal Message</label>
+        <textarea id="voucher-message" placeholder="Write a heartfelt message..." rows="3"></textarea>
+      </div>
+
+      <!-- Delivery Options -->
+      <div class="form-group">
+        <label>Delivery Method</label>
+        <select id="delivery-method">
+          <option value="inapp">📱 In-App (Show code)</option>
+          <option value="sms">💬 SMS to Recipient</option>
+          <option value="email">📧 Email to Recipient</option>
+        </select>
+      </div>
+
+      <div class="form-group">
+        <label>Delivery Date</label>
+        <input type="date" id="delivery-date">
+      </div>
+
+      <!-- Total -->
+      <div class="voucher-total">
+        <span>Total Amount:</span>
+        <strong id="total-amount">₹1,000</strong>
+      </div>
+
+      <button type="button" id="create-voucher-btn" class="btn primary full-width">🎁 Create Gift Voucher</button>
+    </div>
+  </div>
+</section>
+
+<style>
+.voucher-page { max-width: 900px; margin: 0 auto; padding: 20px; }
+.voucher-page h1 { text-align: center; color: var(--accent); }
+.subtitle { text-align: center; color: var(--muted); margin-bottom: 30px; }
+
+.voucher-container { display: grid; grid-template-columns: 1fr 1fr; gap: 30px; }
+@media (max-width: 768px) { .voucher-container { grid-template-columns: 1fr; } }
+
+.voucher-preview h3, .voucher-form h3 { color: var(--text); margin-bottom: 15px; }
+
+/* Gift Card Styles */
+.gift-card {
+  border-radius: 16px;
+  padding: 20px;
+  color: white;
+  box-shadow: 0 10px 30px rgba(0,0,0,0.3);
+  transition: all 0.3s;
+}
+.gift-card .card-inner { text-align: center; }
+.gift-card .card-header { display: flex; justify-content: space-between; align-items: center; margin-bottom: 20px; }
+.gift-card .brand { font-weight: 700; font-size: 18px; }
+.gift-card .amount-preview { font-size: 32px; font-weight: 800; }
+.gift-card .card-code { background: rgba(255,255,255,0.2); padding: 10px 20px; border-radius: 8px; font-family: monospace; font-size: 18px; letter-spacing: 2px; margin-bottom: 15px; }
+.gift-card .card-message { font-style: italic; opacity: 0.9; margin-bottom: 20px; min-height: 24px; }
+.gift-card .card-footer { display: flex; justify-content: space-between; align-items: center; font-size: 14px; }
+.gift-card .theme-badge { background: rgba(255,255,255,0.2); padding: 4px 10px; border-radius: 20px; }
+
+/* Theme backgrounds */
+.gift-card.default { background: linear-gradient(135deg, #667eea 0%, #764ba2 100%); }
+.gift-card.diwali { background: linear-gradient(135deg, #f12711 0%, #f5af19 100%); }
+.gift-card.wedding { background: linear-gradient(135deg, #f093fb 0%, #f5576c 100%); }
+.gift-card.birthday { background: linear-gradient(135deg, #11998e 0%, #38ef7d 100%); }
+.gift-card.anniversary { background: linear-gradient(135deg, #ff416c 0%, #ff4b2b 100%); }
+
+/* Form Styles */
+.form-group { margin-bottom: 15px; }
+.form-group label { display: block; color: var(--text); margin-bottom: 8px; font-weight: 600; }
+.form-group input, .form-group select, .form-group textarea { width: 100%; padding: 12px; background: var(--card); border: 1px solid var(--border); border-radius: 8px; color: var(--text); }
+.form-group input:focus, .form-group select:focus, .form-group textarea:focus { outline: none; border-color: var(--primary); }
+
+.form-row { display: grid; grid-template-columns: 1fr 1fr; gap: 15px; }
+
+.amount-options { display: flex; flex-wrap: wrap; gap: 8px; }
+.amount-btn { padding: 10px 16px; background: var(--card); border: 1px solid var(--border); border-radius: 8px; color: var(--text); cursor: pointer; transition: all 0.2s; }
+.amount-btn:hover, .amount-btn.selected { background: var(--primary); color: white; border-color: var(--primary); }
+
+.theme-options { display: flex; flex-wrap: wrap; gap: 8px; }
+.theme-btn { padding: 8px 16px; border: none; border-radius: 20px; color: white; cursor: pointer; font-weight: 600; }
+
+.voucher-total { display: flex; justify-content: space-between; padding: 15px; background: var(--card); border-radius: 8px; margin: 20px 0; font-size: 18px; }
+.voucher-total strong { color: var(--accent); font-size: 24px; }
+</style>
+
+<script>
+document.addEventListener('DOMContentLoaded', () => {
+  let selectedAmount = 1000;
+  let selectedTheme = 'default';
+
+  // Amount selection
+  document.querySelectorAll('.amount-btn').forEach(btn => {
+    btn.addEventListener('click', () => {
+      document.querySelectorAll('.amount-btn').forEach(b => b.classList.remove('selected'));
+      btn.classList.add('selected');
+      
+      const amount = btn.dataset.amount;
+      if (amount === 'custom') {
+        document.getElementById('custom-amount').style.display = 'block';
+        selectedAmount = parseInt(document.getElementById('custom-amount').value) || 1000;
+      } else {
+        document.getElementById('custom-amount').style.display = 'none';
+        selectedAmount = parseInt(amount);
+      }
+      updatePreview();
+    });
+  });
+
+  // Custom amount input
+  document.getElementById('custom-amount').addEventListener('input', (e) => {
+    selectedAmount = parseInt(e.target.value) || 1000;
+    updatePreview();
+  });
+
+  // Theme selection
+  document.querySelectorAll('.theme-btn').forEach(btn => {
+    btn.addEventListener('click', () => {
+      document.querySelectorAll('.theme-btn').forEach(b => b.style.transform = 'scale(1)'));
+      btn.style.transform = 'scale(1.1)';
+      selectedTheme = btn.dataset.theme;
+      updatePreview();
+    });
+  });
+
+  // Message preview
+  document.getElementById('voucher-message').addEventListener('input', updatePreview);
+  document.getElementById('recipient-name').addEventListener('input', updatePreview);
+
+  function updatePreview() {
+    document.getElementById('preview-amount').textContent = selectedAmount.toLocaleString();
+    document.getElementById('preview-message').textContent = document.getElementById('voucher-message').value || 'Gift for you!';
+    document.getElementById('preview-recipient').textContent = document.getElementById('recipient-name').value || 'Recipient Name';
+    document.getElementById('total-amount').textContent = `₹${selectedAmount.toLocaleString()}`;
+    
+    const card = document.getElementById('voucher-card');
+    card.className = `gift-card ${selectedTheme}`;
+    
+    const themes = {{ themes|tojson }};
+    document.getElementById('preview-theme').textContent = themes[selectedTheme]?.name || 'Classic';
+  }
+
+  // Set default date to today
+  document.getElementById('delivery-date').valueAsDate = new Date();
+
+  // Create voucher
+  document.getElementById('create-voucher-btn').addEventListener('click', async () => {
+    const btn = document.getElementById('create-voucher-btn');
+    btn.disabled = true;
+    btn.textContent = 'Creating...';
+
+    const payload = {
+      amount: selectedAmount,
+      sender_name: document.getElementById('sender-name').value,
+      recipient_name: document.getElementById('recipient-name').value,
+      recipient_phone: document.getElementById('recipient-phone').value,
+      recipient_email: document.getElementById('recipient-email').value,
+      message: document.getElementById('voucher-message').value,
+      theme: selectedTheme,
+      delivery_method: document.getElementById('delivery-method').value,
+      delivery_date: document.getElementById('delivery-date').value
+    };
+
+    if (!payload.sender_name || !payload.recipient_name) {
+      alert('Please fill in required fields');
+      btn.disabled = false;
+      btn.textContent = '🎁 Create Gift Voucher';
+      return;
+    }
+
+    try {
+      const res = await fetch('/api/voucher/create', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify(payload)
+      });
+
+      const data = await res.json();
+
+      if (data.success) {
+        document.getElementById('preview-code').textContent = data.voucher_code;
+        document.getElementById('voucher-card').style.display = 'block';
+        alert(`🎁 Voucher created!\n\nCode: ${data.voucher_code}\nAmount: ₹${selectedAmount}\n\nShare this code with ${payload.recipient_name}!`);
+        
+        // Reset form
+        document.querySelectorAll('input, textarea').forEach(el => el.value = '');
+        document.getElementById('delivery-date').valueAsDate = new Date();
+        
+        // Option to view voucher
+        window.location.href = `/voucher/${data.voucher_code}`;
+      } else {
+        alert(data.error || 'Failed to create voucher');
+      }
+    } catch (err) {
+      alert('Error creating voucher');
+    }
+
+    btn.disabled = false;
+    btn.textContent = '🎁 Create Gift Voucher';
+  });
+});
+</script>
+{% endblock %}
