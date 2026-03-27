@@ -1,7 +1,7 @@
 import os
 import json
 import uuid
-from datetime import datetime, UTC
+from datetime import datetime, UTC, timedelta
 from urllib.parse import quote
 from flask import Flask, render_template, jsonify, request, redirect, url_for, abort, session
 from dotenv import load_dotenv
@@ -22,6 +22,11 @@ load_dotenv()
 
 app = Flask(__name__)
 app.secret_key = os.getenv("SECRET_KEY", "dev-secret")
+app.config['SESSION_COOKIE_SECURE'] = False
+app.config['SESSION_COOKIE_HTTPONLY'] = True
+app.config['SESSION_COOKIE_SAMESITE'] = 'Lax'
+app.permanent_session_lifetime = timedelta(hours=24)
+
 UNSPLASH_ACCESS_KEY = os.getenv("UNSPLASH_ACCESS_KEY", "")
 
 # Load products once
