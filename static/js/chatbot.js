@@ -151,11 +151,7 @@
     if (!text) return;
     
     // Block image/file references
-    if (text.match(/\.(png|jpg|jpeg|gif|webp)$/i) || 
-        text.includes('image.png') || 
-        text.includes('image:') ||
-        text.includes('image/jpeg') ||
-        text.includes('cannot read')) {
+    if (text.match(/\.(png|jpg|jpeg|gif|webp)$/i)) {
       addBubble('Sorry, I can only read text messages. Please type your question instead!', true);
       input.value = '';
       return;
