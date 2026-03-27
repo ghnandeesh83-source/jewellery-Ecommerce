@@ -128,14 +128,33 @@ def api_send_otp():
     if not phone or not phone.isdigit() or len(phone) != 10:
         return jsonify({'error': 'Invalid phone number'}), 400
 
-    # Generate and store a mock OTP
+    # Generate OTP
     otp = str(random.randint(100000, 999999))
     session['otp'] = otp
     session['otp_phone'] = phone
 
-    # In a real app, you would send this OTP via SMS
-    # For this demo, we don't return OTP to screen
-    print(f"OTP for {phone}: {otp}")  # Only visible in server console
+    # Try to send via Twilio SMS
+    try:
+        if TwilioClient:
+            twilio_sid = os.getenv('TWILIO_ACCOUNT_SID')
+            twilio_token = os.getenv('TWILIO_AUTH_TOKEN')
+            twilio_from = os.getenv('TWILIO_FROM_NUMBER')
+            
+            if twilio_sid and twilio_token and twilio_from and twilio_sid != '{{TWILIO_ACCOUNT_SID}}':
+                client = TwilioClient(twilio_sid, twilio_token)
+                full_phone = f'+91{phone}'
+                message = client.messages.create(
+                    body=f'Your Shri Jewellery OTP is: {otp}',
+                    from_=twilio_from,
+                    to=full_phone
+                )
+                print(f"OTP sent via Twilio to {phone}: {otp}")
+                return jsonify({'success': True, 'message': 'OTP sent to your phone!'})
+    except Exception as e:
+        print(f"Twilio error: {e}")
+
+    # Fallback: Print to console (for testing)
+    print(f"OTP for +91{phone}: {otp}")
     return jsonify({'success': True})
 
 
