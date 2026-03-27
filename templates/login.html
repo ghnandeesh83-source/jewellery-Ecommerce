@@ -15,18 +15,12 @@
             <input type="tel" id="phone" name="phone" placeholder="98765 43210" required>
           </div>
         </div>
-        <button type="button" id="send-otp-btn" class="btn primary full-width">Send OTP via SMS</button>
-        <div style="text-align: center; margin: 15px 0; color: #666;">- OR -</div>
-        <button type="button" id="send-whatsapp-btn" class="btn whatsapp-btn full-width">
-          <span style="font-size: 18px;">📱</span> Get OTP via WhatsApp
-        </button>
-        <div id="otp-sent-message" style="color: #22c55e; font-size: 13px; margin-top: 10px; text-align: center; display: none;">OTP sent! Check your WhatsApp.</div>
-        <div id="whatsapp-link" style="margin-top: 15px; text-align: center; display: none;">
-          <p style="color: #666; font-size: 12px;">Or tap below to get OTP:</p>
-          <a id="whatsapp-link-btn" href="#" target="_blank" class="btn whatsapp-btn full-width" style="text-decoration: none;">
-            📱 Open WhatsApp for OTP
-          </a>
-        </div>
+        <button type="button" id="send-otp-btn" class="btn primary full-width">Send OTP</button>
+      </div>
+      <div id="otp-display" style="display: none; background: #e8f5e9; border: 2px solid #4caf50; border-radius: 8px; padding: 15px; margin: 15px 0; text-align: center;">
+        <p style="color: #2e7d32; font-size: 12px; margin-bottom: 8px;">Your OTP is:</p>
+        <p id="otp-code" style="font-size: 28px; font-weight: bold; color: #1b5e20; letter-spacing: 8px; margin: 0;"></p>
+        <p style="color: #666; font-size: 11px; margin-top: 8px;">(For demo - OTP shown on screen)</p>
       </div>
       <div id="otp-step" style="display: none;">
         <div class="input-group">
@@ -39,15 +33,4 @@
     </form>
   </div>
 </div>
-<style>
-  .whatsapp-btn {
-    background: linear-gradient(135deg, #25D366 0%, #128C7E 100%);
-    color: white;
-    border: none;
-    font-weight: 600;
-  }
-  .whatsapp-btn:hover {
-    background: linear-gradient(135deg, #128C7E 0%, #075E54 100%);
-  }
-</style>
 {% endblock %}
